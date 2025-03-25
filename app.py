@@ -1,6 +1,6 @@
 
 
-pip install matplotlib
+pip install -r requirements.txt
 
 
 
