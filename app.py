@@ -82,9 +82,9 @@ def plot_gibbs_triangle(A, B):
                     color='black', fontweight=fontweight)
             
             # Annotate side AB (Component C from right to left)
-            x_ab = 0.5 + fraction / 2
+            x_ab = 0.5 + fraction / 2 - 0.02
             y_ab = np.sqrt(3) / 2 * (1 - fraction)
-            ax.text(x_ab + 0.02, y_ab + 0.02, f"{percentage}%", 
+            ax.text(x_ab, y_ab + 0.02, f"{percentage}%", 
                     ha='center', va='bottom', fontsize=fontsize, 
                     color='black', fontweight=fontweight)
     
@@ -112,5 +112,3 @@ if st.button("Plot"):
     else:
         fig = plot_gibbs_triangle(A, B)
         st.pyplot(fig)
-
-
