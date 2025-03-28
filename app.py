@@ -1,8 +1,3 @@
-
-
-
-
-
 import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
@@ -75,6 +70,23 @@ def plot_gibbs_triangle(A, B):
             ax.text(0.5 * fraction - 0.02, np.sqrt(3) / 2 * fraction, f"{100-percentage}%", 
                     ha='right', va='center', fontsize=fontsize, 
                     color='black', fontweight=fontweight)
+            
+            # Annotate lines from bottom-left to top (Component B)
+            ax.text(fraction, -0.02, f"{percentage}%", 
+                    ha='center', va='top', fontsize=fontsize, 
+                    color='black', fontweight=fontweight)
+            
+            # Annotate lines from bottom-right to top (Component C)
+            ax.text(1 - fraction, -0.02, f"{percentage}%", 
+                    ha='center', va='top', fontsize=fontsize, 
+                    color='black', fontweight=fontweight)
+            
+            # Annotate side AB (Component C from right to left)
+            x_ab = 0.5 + fraction / 2
+            y_ab = np.sqrt(3) / 2 * (1 - fraction)
+            ax.text(x_ab, y_ab + 0.02, f"{percentage}%", 
+                    ha='center', va='bottom', fontsize=fontsize, 
+                    color='black', fontweight=fontweight)
     
     # Labels for the components
     ax.text(0.5, np.sqrt(3) / 2 + 0.05, f"Component A ({A*100:.2f}%)", ha='center', fontsize=12, fontweight='bold', color='darkblue')
@@ -100,3 +112,4 @@ if st.button("Plot"):
     else:
         fig = plot_gibbs_triangle(A, B)
         st.pyplot(fig)
+
