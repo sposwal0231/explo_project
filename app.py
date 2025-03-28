@@ -1,134 +1,65 @@
-import streamlit as st
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+from matplotlib.patches import Polygon
 
-def plot_gibbs_triangle(A, B):
-    C = 1 - A - B
-    
-    # Check if composition sums to 1
-    if not (abs(A + B + C - 1) < 1e-6):
-        raise ValueError("Composition fractions must sum to 1.")
-    
-    # Convert to ternary coordinates
-    x = 0.5 * (2 * B + A)
-    y = (np.sqrt(3) / 2) * A
-    
-    # Define triangle vertices
-    triangle = np.array([[0, 0], [1, 0], [0.5, np.sqrt(3) / 2], [0, 0]])
-    
-    # Create a figure
-    fig, ax = plt.subplots(figsize=(8, 8))
-    
-    # Plot the triangle
-    ax.plot(triangle[:, 0], triangle[:, 1], 'k-', linewidth=3)
-    
-    # Plot 20 equidistant grid lines for each component
-    num_lines = 20
-    for i in range(1, num_lines):
-        fraction = i / num_lines
-        percentage = int(fraction * 100)
-        
-        if percentage % 10 == 0:
-            color = 'red'
-            linewidth = 1.5
-            alpha = 0.8
-        elif percentage % 5 == 0:
-            color = 'blue'
-            linewidth = 1
-            alpha = 0.6
-        else:
-            color = 'gray'
-            linewidth = 0.5
-            alpha = 0.3
-        
-        # Horizontal lines (parallel to base, for Component A)
-        ax.plot([0.5 * fraction, 1 - 0.5 * fraction], 
-                [np.sqrt(3) / 2 * fraction, np.sqrt(3) / 2 * fraction], 
-                color=color, linestyle='dotted', linewidth=linewidth, alpha=alpha)
-        
-        # Lines from bottom-left to top (for Component B)
-        ax.plot([fraction, 0.5 + fraction / 2], 
-                [0, np.sqrt(3) / 2 * (1 - fraction)], 
-                color=color, linestyle='dotted', linewidth=linewidth, alpha=alpha)
-        
-        # Lines from bottom-right to top (for Component C)
-        ax.plot([1 - fraction, 0.5 - fraction / 2], 
-                [0, np.sqrt(3) / 2 * (1 - fraction)], 
-                color=color, linestyle='dotted', linewidth=linewidth, alpha=alpha)
-    
-    # Add numbers to the grid lines (multiples of 5 and 10) on horizontal lines only
-    for i in range(1, num_lines):
-        fraction = i / num_lines
-        percentage = int(fraction * 100)
-        
-        if percentage % 5 == 0:
-            # Determine text properties based on whether it's a multiple of 10 or 5
-            fontsize = 10 if percentage % 10 == 0 else 8
-            fontweight = 'bold' if percentage % 10 == 0 else 'normal'
-            
-            # Annotate horizontal lines (Component A)
-            ax.text(0.5 * fraction - 0.02, np.sqrt(3) / 2 * fraction, f"{100-percentage}%", 
-                    ha='right', va='center', fontsize=fontsize, 
-                    color='black', fontweight=fontweight)
-            
-            # Annotate lines from bottom-left to top (Component B)
-            ax.text(fraction, -0.02, f"{percentage}%", 
-                    ha='center', va='top', fontsize=fontsize, 
-                    color='black', fontweight=fontweight)
-            
-            # Annotate lines from bottom-right to top (Component C)
-            ax.text(1 - fraction, -0.02, f"{percentage}%", 
-                    ha='center', va='top', fontsize=fontsize, 
-                    color='black', fontweight=fontweight)
-            
-            # Annotate side AB (Component C from right to left)
-            x_ab = 0.5 + fraction / 2 - 0.02
-            y_ab = np.sqrt(3) / 2 * (1 - fraction)
-            ax.text(x_ab, y_ab + 0.02, f"{percentage}%", 
-                    ha='center', va='bottom', fontsize=fontsize, 
-                    color='black', fontweight=fontweight)
-            
-            # Annotate side BC (Component A from right to left)
-            x_bc = 1 - fraction
-            y_bc = np.sqrt(3) / 2 * (1 - fraction)
-            ax.text(x_bc - 0.03, y_bc + 0.03, f"{percentage}%", 
-                    ha='right', va='bottom', fontsize=fontsize, 
-                    color='black', fontweight=fontweight, rotation=-30)
-    
-    # Calculate coordinates for 50% on side AC
-    fraction_ac = 0.5
-    x_ac = 0.5 * (1 - fraction_ac)
-    y_ac = np.sqrt(3) / 2 * fraction_ac
-    
-    # Calculate coordinates for 60% on side BC
-    fraction_bc = 0.6
-    x_bc = 1 - fraction_bc
-    y_bc = np.sqrt(3) / 2 * (1 - fraction_bc)
-    
-    # Plot the trajectory line
-    ax.plot([x_ac, x_bc], [y_ac, y_bc], color='green', linestyle='solid', linewidth=2)
-    
-    # Labels for the components
-    ax.text(0.5, np.sqrt(3) / 2 + 0.05, f"Component A ({A*100:.2f}%)", ha='center', fontsize=12, fontweight='bold', color='darkblue')
-    ax.text(1.05, -0.05, f"Component B ({B*100:.2f}%)", ha='right', fontsize=12, fontweight='bold', color='darkgreen')
-    ax.text(-0.05, -0.05, f"Component C ({C*100:.2f}%)", ha='left', fontsize=12, fontweight='bold', color='darkred')
-    
-    # Plot the composition point with a glowing effect
-    ax.scatter(x, y, color='gold', s=200, label="Given Composition", edgecolor='black', linewidth=2)
-    ax.scatter(x, y, color='gold', s=400, alpha=0.2)  # Glow effect
-    
-    ax.axis('off')
-    
-    return fig
+# Triangle vertices
+A = np.array([0, 0])
+B = np.array([5, 0])
+C = np.array([2.5, 4.33])  # Equilateral triangle height ≈ 4.33
 
-# Streamlit app
-st.title("Gibbs Triangle Plotter")
-A = st.number_input("Enter fraction of Component A", min_value=0.0, max_value=1.0, value=0.0)
-B = st.number_input("Enter fraction of Component B", min_value=0.0, max_value=1.0, value=0.0)
+# Create figure and axis
+fig, ax = plt.subplots(figsize=(10, 8))
+ax.set_xlim(-1, 6)
+ax.set_ylim(-1, 5)
+ax.set_aspect('equal')
+ax.grid(True)
 
-if st.button("Plot"):
-    if A + B > 1:
-        st.error("Composition fractions must sum to 1.")
-    else:
-        fig = plot_gibbs_triangle(A, B)
-        st.pyplot(fig)
+# Draw the triangle
+triangle = Polygon([A, B, C], fill=False, edgecolor='black', linewidth=2)
+ax.add_patch(triangle)
+
+# Label the vertices
+ax.text(A[0]-0.2, A[1]-0.2, 'A', fontsize=12)
+ax.text(B[0]+0.2, B[1]-0.2, 'B', fontsize=12)
+ax.text(C[0], C[1]+0.2, 'C', fontsize=12)
+
+# Initialize moving point on AC and its projection line
+point_on_AC, = ax.plot([], [], 'ro')
+projection_line, = ax.plot([], [], 'b--')
+projection_foot, = ax.plot([], [], 'go')
+
+# Function to find the foot of the perpendicular from point P to line BC
+def find_perpendicular_foot(P, B, C):
+    # Vector BC
+    BC = C - B
+    # Vector BP
+    BP = P - B
+    # Projection of BP onto BC
+    t = np.dot(BP, BC) / np.dot(BC, BC)
+    t = np.clip(t, 0, 1)  # Ensure the foot is within the segment BC
+    foot = B + t * BC
+    return foot
+
+# Animation update function
+def update(t):
+    # Parameter t goes from 0 to 1
+    # Calculate point position along AC
+    P = A + t * (C - A)
+    point_on_AC.set_data([P[0]], [P[1]])
+    
+    # Find the foot of the perpendicular from P to BC
+    foot = find_perpendicular_foot(P, B, C)
+    
+    # Update projection line (from P to foot)
+    projection_line.set_data([P[0], foot[0]], [P[1], foot[1]])
+    projection_foot.set_data([foot[0]], [foot[1]])
+    
+    return point_on_AC, projection_line, projection_foot
+
+# Create animation
+ani = FuncAnimation(fig, update, frames=np.linspace(0, 1, 100),
+                    interval=50, blit=True)
+
+plt.title('Point moving along AC with projection to BC')
+plt.show()
