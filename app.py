@@ -84,7 +84,7 @@ def plot_gibbs_triangle(A, B):
             # Annotate side AB (Component C from right to left)
             x_ab = 0.5 + fraction / 2
             y_ab = np.sqrt(3) / 2 * (1 - fraction)
-            ax.text(x_ab + 0.02, y_ab - 0.02, f"{percentage}%", 
+            ax.text(x_ab + 0.02, y_ab - 0.01, f"{percentage}%", 
                     ha='center', va='bottom', fontsize=fontsize, 
                     color='black', fontweight=fontweight)
     
