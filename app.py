@@ -84,9 +84,29 @@ def plot_gibbs_triangle(A, B):
             # Annotate side AB (Component C from right to left)
             x_ab = 0.5 + fraction / 2 - 0.02
             y_ab = np.sqrt(3) / 2 * (1 - fraction)
-            ax.text(x_ab + 0.06, y_ab - 0.01, f"{percentage}%", 
+            ax.text(x_ab, y_ab + 0.02, f"{percentage}%", 
                     ha='center', va='bottom', fontsize=fontsize, 
                     color='black', fontweight=fontweight)
+            
+            # Annotate side BC (Component A from right to left)
+            x_bc = 1 - fraction
+            y_bc = np.sqrt(3) / 2 * (1 - fraction)
+            ax.text(x_bc - 0.03, y_bc + 0.03, f"{percentage}%", 
+                    ha='right', va='bottom', fontsize=fontsize, 
+                    color='black', fontweight=fontweight, rotation=-30)
+    
+    # Calculate coordinates for 50% on side AC
+    fraction_ac = 0.5
+    x_ac = 0.5 * (1 - fraction_ac)
+    y_ac = np.sqrt(3) / 2 * fraction_ac
+    
+    # Calculate coordinates for 60% on side BC
+    fraction_bc = 0.6
+    x_bc = 1 - fraction_bc
+    y_bc = np.sqrt(3) / 2 * (1 - fraction_bc)
+    
+    # Plot the trajectory line
+    ax.plot([x_ac, x_bc], [y_ac, y_bc], color='green', linestyle='solid', linewidth=2)
     
     # Labels for the components
     ax.text(0.5, np.sqrt(3) / 2 + 0.05, f"Component A ({A*100:.2f}%)", ha='center', fontsize=12, fontweight='bold', color='darkblue')
