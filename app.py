@@ -87,13 +87,6 @@ def plot_gibbs_triangle(A, B):
             ax.text(x_ab, y_ab + 0.02, f"{percentage}%", 
                     ha='center', va='bottom', fontsize=fontsize, 
                     color='black', fontweight=fontweight)
-            
-            # Annotate side BC (Component A from right to left)
-            x_bc = 1 - fraction
-            y_bc = np.sqrt(3) / 2 * (1 - fraction)
-            ax.text(x_bc - 0.02, y_bc + 0.02, f"{percentage}%", 
-                    ha='right', va='bottom', fontsize=fontsize, 
-                    color='black', fontweight=fontweight)
     
     # Labels for the components
     ax.text(0.5, np.sqrt(3) / 2 + 0.05, f"Component A ({A*100:.2f}%)", ha='center', fontsize=12, fontweight='bold', color='darkblue')
