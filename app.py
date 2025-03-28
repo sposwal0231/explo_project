@@ -43,7 +43,7 @@ def plot_gibbs_triangle(A, B):
         
         # Horizontal lines (parallel to base, for Component A)
         ax.plot([0.5 * fraction, 1 - 0.5 * fraction], 
-                [np.sqrt(3) / 2 * fraction, np.sqrt(3) / 2 * fraction], 
+                [np.sqrt(3) / 2 * fraction, np.sqrt(3) / 2 * fraction)], 
                 color=color, linestyle='dotted', linewidth=linewidth, alpha=alpha)
         
         # Lines from bottom-left to top (for Component B)
