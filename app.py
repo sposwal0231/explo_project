@@ -3,11 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def plot_gibbs_triangle(A, B):
-    C = 1 - A - B
-    
-    # Check if composition sums to 1
-    if not (abs(A + B + C - 1) < 1e-6):
-        raise ValueError("Composition fractions must sum to 1.")
+    C = 1 - A - B  # Safe because validation happens in Streamlit
     
     # Convert to ternary coordinates
     x = 0.5 * (2 * B + A)
@@ -56,13 +52,12 @@ def plot_gibbs_triangle(A, B):
                 [0, np.sqrt(3) / 2 * (1 - fraction)], 
                 color=color, linestyle='dotted', linewidth=linewidth, alpha=alpha)
     
-    # Add numbers to the grid lines (multiples of 5 and 10) on horizontal lines only
+    # Add numbers to the grid lines
     for i in range(1, num_lines):
         fraction = i / num_lines
         percentage = int(fraction * 100)
         
         if percentage % 5 == 0:
-            # Determine text properties based on whether it's a multiple of 10 or 5
             fontsize = 10 if percentage % 10 == 0 else 8
             fontweight = 'bold' if percentage % 10 == 0 else 'normal'
             
@@ -107,8 +102,8 @@ A = st.number_input("Enter fraction of Component A", min_value=0.0, max_value=1.
 B = st.number_input("Enter fraction of Component B", min_value=0.0, max_value=1.0, value=0.0)
 
 if st.button("Plot"):
-    if A + B > 1:
-        st.error("Composition fractions must sum to 1.")
+    if (A + B) > 1.0 + 1e-9:  # Add tolerance for floating-point errors
+        st.error("A + B cannot exceed 1.0")
     else:
         fig = plot_gibbs_triangle(A, B)
         st.pyplot(fig)
