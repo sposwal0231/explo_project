@@ -30,12 +30,10 @@ C_vertex = (1, 0)
 
 # Phase regions: All coordinates are within the triangle
 phase_regions = {
-    "α": [B_vertex, (0.25, np.sqrt(3)/4), (0, 0), (0.25, 0)],  # Lower left
-    "β": [(0.25, np.sqrt(3)/4), (0.5, 0), (0.75, np.sqrt(3)/4), (0.5, np.sqrt(3)/2)],  # Center and top
-    "γ": [(0.5, 0), C_vertex, (0.75, np.sqrt(3)/4)]  # Lower right
+    "α": [B_vertex, (0.25, np.sqrt(3)/4), (0.5, 0), (0.25, 0)],
+    "β": [(0.25, np.sqrt(3)/4), (0.5, 0), (0.75, np.sqrt(3)/4), (0.5, np.sqrt(3)/2)],
+    "γ": [(0.5, 0), C_vertex, (0.75, np.sqrt(3)/4)]
 }
-
-# For a more visually distinct split, you can adjust the above polygons as you like
 
 phase_colors = {
     "α": "lightblue",
@@ -44,7 +42,6 @@ phase_colors = {
 }
 
 def get_phase(x, y):
-    # Use the center of each region for a simple phase assignment
     for phase, coords in phase_regions.items():
         path = Path(coords)
         if path.contains_point((x, y)):
@@ -116,6 +113,14 @@ else:
     ax.text(0.5, np.sqrt(3)/2 + 0.05, "A (100%)", ha='center', fontsize=13, fontweight='bold', color='orange')
     ax.text(-0.05, -0.05, "B (100%)", ha='right', fontsize=13, fontweight='bold', color='blue')
     ax.text(1.05, -0.05, "C (100%)", ha='left', fontsize=13, fontweight='bold', color='green')
+
+    # Add legend for phase colors
+    legend_patches = [
+        patches.Patch(color=phase_colors["α"], label="Phase α (light blue)"),
+        patches.Patch(color=phase_colors["β"], label="Phase β (light green)"),
+        patches.Patch(color=phase_colors["γ"], label="Phase γ (light coral)")
+    ]
+    ax.legend(handles=legend_patches, loc='upper center', bbox_to_anchor=(0.5, -0.08), ncol=3, frameon=True)
 
     # Set aspect ratio and limits for perfect equilateral triangle
     ax.set_aspect('equal', adjustable='datalim')
