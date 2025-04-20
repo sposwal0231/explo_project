@@ -47,27 +47,34 @@ else:
     st.success(f"Composition: A = {A}%, B = {B}%, C = {C}% → Phase: **{phase}**")
 
     # Plot setup
-    fig, ax = plt.subplots(figsize=(7, 7))
+    fig, ax = plt.subplots(figsize=(8, 8))  # Increased size
     ax.set_facecolor("#1e1e1e")  # Dark background
 
     # Draw main triangle
     triangle_coords = np.array([[0, 0], [1, 0], [0.5, np.sqrt(3)/2]])
-    triangle_patch = patches.Polygon(triangle_coords, closed=True, facecolor="#2e2e2e", edgecolor='white', lw=2)
+    triangle_patch = patches.Polygon(
+        triangle_coords, closed=True, facecolor="#2e2e2e",
+        edgecolor='white', lw=2, zorder=2
+    )
     ax.add_patch(triangle_patch)
     triangle_path = Path(triangle_coords)
 
     # Draw phase regions (clipped to triangle)
     phase_colors = {'α': '#4f81bd', 'β': '#f58f82', 'γ': '#93d19b'}
     for phase, coords in phase_regions.items():
-        patch = patches.Polygon(coords, closed=True, facecolor=phase_colors[phase], alpha=0.7, label=f"Phase {phase}")
+        patch = patches.Polygon(
+            coords, closed=True, facecolor=phase_colors[phase],
+            alpha=0.7, label=f"Phase {phase}"
+        )
         patch.set_clip_path(triangle_patch)
+        patch.set_clip_on(True)
         ax.add_patch(patch)
 
-    # Grid lines
+    # Grid lines and labels
     for i in range(5, 100, 5):
         f = i / 100
         is_major = i % 10 == 0
-        color = '#bbbbbb' if is_major else '#666666'
+        color = '#ffffff' if is_major else '#aaaaaa'  # Improved contrast
         lw = 1.5 if is_major else 0.8
         ls = '-' if is_major else '--'
         fontsize = 8 if is_major else 6
