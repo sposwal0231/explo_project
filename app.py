@@ -3,9 +3,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.patches as patches
 import matplotlib.patches as mpatches
+from matplotlib.path import Path
 import io
 
-st.title("Ternary Diagram with Phase Regions, Legend, and Download")
+st.title("Ternary Diagram with Phase Regions, Boundaries, Legend, and Result")
 
 A = st.slider("Component A (%)", 0, 100, step=5, value=50)
 B = st.slider("Component B (%)", 0, 100 - A, step=5, value=30)
@@ -21,14 +22,20 @@ A_vertex = (0.5, np.sqrt(3)/2)
 B_vertex = (0, 0)
 C_vertex = (1, 0)
 
-# Phase boundary lines (as in your image)
-boundary1 = [ternary_to_cartesian(70, 30, 0), ternary_to_cartesian(20, 60, 20)]
-boundary2 = [ternary_to_cartesian(20, 60, 20), ternary_to_cartesian(0, 20, 80)]
+# Phase boundary points
+pt1 = ternary_to_cartesian(70, 30, 0)
+pt2 = ternary_to_cartesian(20, 60, 20)
+pt3 = ternary_to_cartesian(0, 20, 80)
 
-# Phase region polygons (traced from your image)
-region_alpha = [B_vertex, ternary_to_cartesian(70, 30, 0), ternary_to_cartesian(20, 60, 20)]
-region_beta = [ternary_to_cartesian(70, 30, 0), A_vertex, C_vertex, ternary_to_cartesian(0, 20, 80), ternary_to_cartesian(20, 60, 20)]
-region_gamma = [B_vertex, ternary_to_cartesian(20, 60, 20), ternary_to_cartesian(0, 20, 80), C_vertex]
+# Phase boundary lines (now three bold lines)
+boundary1 = [pt1, pt2]  # alpha/beta
+boundary2 = [pt2, pt3]  # beta/gamma
+boundary3 = [A_vertex, B_vertex]  # alpha/gamma (left edge)
+
+# Phase region polygons
+region_alpha = [B_vertex, pt1, pt2, A_vertex]
+region_beta = [pt2, pt3, C_vertex, A_vertex]
+region_gamma = [B_vertex, pt2, pt3]
 
 phase_regions = {
     "α": region_alpha,
@@ -42,7 +49,6 @@ phase_colors = {
 }
 
 def get_phase(x, y):
-    from matplotlib.path import Path
     for phase, coords in phase_regions.items():
         path = Path(coords)
         if path.contains_point((x, y)):
@@ -63,6 +69,7 @@ for p, coords in phase_regions.items():
 # Draw bold black phase boundaries
 ax.plot(*zip(*boundary1), color='black', lw=3, zorder=2)
 ax.plot(*zip(*boundary2), color='black', lw=3, zorder=2)
+ax.plot(*zip(*boundary3), color='black', lw=3, zorder=2)
 
 # Draw main triangle
 triangle_coords = np.array([B_vertex, C_vertex, A_vertex])
@@ -110,6 +117,9 @@ ax.set_ylim(0, np.sqrt(3)/2)
 ax.axis('off')
 
 st.pyplot(fig)
+
+# --- Show result message ---
+st.success(f"Composition: A = {A}%, B = {B}%, C = {C}% → Phase: **{phase}**")
 
 # --- Download Feature ---
 buf = io.BytesIO()
