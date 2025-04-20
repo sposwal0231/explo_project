@@ -5,18 +5,18 @@ import numpy as np
 st.title("Ternary Diagram (Gibbs Triangle) Plotter")
 
 st.markdown("""
-Provide values for each of the three components (A, B, C) such that their sum equals 100.
+Provide values for components A and B. Component C will be calculated as 100 - A - B.
 """)
 
-# Input fields for A, B, and C
+# Input fields for A and B
 A = st.number_input("Component A (%)", min_value=0, max_value=100, value=30)
 B = st.number_input("Component B (%)", min_value=0, max_value=100 - A, value=30)
 C = 100 - A - B
 
 if A + B > 100:
-    st.error("The sum of A and B cannot exceed 100.")
+    st.error(f"The sum of A and B cannot exceed 100. Current sum: {A + B}")
 else:
-    st.write(f"Component C (%) is automatically set to: **{C}**")
+    st.success(f"Valid input! Component C is automatically calculated as: {C}%")
 
     # Convert ternary coordinates to Cartesian
     def ternary_to_cartesian(a, b, c):
