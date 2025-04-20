@@ -5,7 +5,7 @@ import matplotlib.patches as patches
 from matplotlib.path import Path
 
 # Title and description
-st.title("Ternary Diagram with Phase Regions")
+st.title("Gibb's Traingle with Phase Regions")
 st.markdown("""
 Adjust components **A** and **B**. Component **C** is calculated automatically.  
 Your selected composition will be placed on the triangle and the corresponding **phase region** will be shown.
