@@ -5,12 +5,12 @@ import numpy as np
 st.title("Ternary Diagram (Gibbs Triangle) Plotter")
 
 st.markdown("""
-Provide values for components A and B. Component C will be calculated as 100 - A - B.
+Provide values for components A and B in multiples of 5. Component C will be calculated as 100 - A - B.
 """)
 
-# Input fields for A and B
-A = st.number_input("Component A (%)", min_value=0, max_value=100, value=30)
-B = st.number_input("Component B (%)", min_value=0, max_value=100 - A, value=30)
+# Input fields for A and B (restricted to multiples of 5)
+A = st.selectbox("Component A (%)", options=list(range(0, 105, 5)), index=6)  # default 30
+B = st.selectbox("Component B (%)", options=list(range(0, 105 - A, 5)), index=6)  # default 30
 C = 100 - A - B
 
 if A + B > 100:
