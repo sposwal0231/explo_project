@@ -32,8 +32,8 @@ boundary1 = [pt1, pt2]        # α/β
 boundary2 = [pt2, pt3]        # β/γ
 boundary3 = [B_vertex, pt2]   # α/γ (from vertex B to intersection point)
 
-# Phase region polygons
-region_alpha = [B_vertex, pt1, pt2, A_vertex]
+# Phase region polygons (corrected so α starts at B and is bounded by bold lines and triangle edge)
+region_alpha = [B_vertex, pt2, A_vertex, pt1]
 region_beta = [pt2, pt3, C_vertex, A_vertex]
 region_gamma = [B_vertex, pt2, pt3]
 
