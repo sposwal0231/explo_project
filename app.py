@@ -5,7 +5,7 @@ import matplotlib.patches as patches
 from matplotlib.path import Path
 
 # Title and description
-st.title("🌑 Ternary Diagram (Dark Theme) with Phase Regions")
+st.title("Ternary Diagram with Phase Regions")
 st.markdown("""
 Adjust components **A** and **B**. Component **C** is calculated automatically.  
 Your selected composition will be placed on the triangle and the corresponding **phase region** will be shown.
@@ -48,18 +48,18 @@ else:
 
     # Plot setup
     fig, ax = plt.subplots(figsize=(7, 7))
-    ax.set_facecolor("#1e1e1e")  # Dark background
+    ax.set_facecolor("white")  # Light background
 
     # Draw main triangle
     triangle_coords = np.array([[0, 0], [1, 0], [0.5, np.sqrt(3)/2]])
-    triangle_patch = patches.Polygon(triangle_coords, closed=True, facecolor="#2e2e2e", edgecolor='white', lw=2)
+    triangle_patch = patches.Polygon(triangle_coords, closed=True, facecolor="white", edgecolor='black', lw=2)
     ax.add_patch(triangle_patch)
 
     # Grid lines
     for i in range(5, 100, 5):
         f = i / 100
         is_major = i % 10 == 0
-        color = '#bbbbbb' if is_major else '#666666'
+        color = 'black' if is_major else 'gray'
         lw = 1.5 if is_major else 0.8
         ls = '-' if is_major else '--'
         fontsize = 8 if is_major else 6
@@ -77,12 +77,12 @@ else:
 
     # Plot user point
     ax.plot(x, y, 'ro', markersize=8)
-    ax.text(x, y + 0.035, f"({A}, {B}, {C})", ha='center', fontsize=10, fontweight='bold', color='white')
+    ax.text(x, y + 0.035, f"({A}, {B}, {C})", ha='center', fontsize=10, fontweight='bold', color='black')
 
     # Corner labels
-    ax.text(-0.05, -0.05, "B (100%)", ha='right', fontsize=11, fontweight='bold', color='#00b4d8')
-    ax.text(1.05, -0.05, "C (100%)", ha='left', fontsize=11, fontweight='bold', color='#57cc99')
-    ax.text(0.5, np.sqrt(3)/2 + 0.05, "A (100%)", ha='center', fontsize=11, fontweight='bold', color='#f77f00')
+    ax.text(-0.05, -0.05, "B (100%)", ha='right', fontsize=11, fontweight='bold', color='blue')
+    ax.text(1.05, -0.05, "C (100%)", ha='left', fontsize=11, fontweight='bold', color='green')
+    ax.text(0.5, np.sqrt(3)/2 + 0.05, "A (100%)", ha='center', fontsize=11, fontweight='bold', color='orange')
 
     # Final formatting
     ax.set_aspect('equal')
