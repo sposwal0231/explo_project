@@ -57,15 +57,26 @@ else:
     fig, ax = plt.subplots(figsize=(7, 7))
     ax.set_facecolor("white")  # Light background
 
-    # Draw phase regions
-    for phase, coords in phase_regions.items():
-        phase_patch = patches.Polygon(coords, closed=True, facecolor=phase_colors[phase], edgecolor='black', lw=2, alpha=0.5)
-        ax.add_patch(phase_patch)
-
     # Draw main triangle
     triangle_coords = np.array([[0, 0], [1, 0], [0.5, np.sqrt(3)/2]])
     triangle_patch = patches.Polygon(triangle_coords, closed=True, facecolor="white", edgecolor='black', lw=2)
     ax.add_patch(triangle_patch)
+
+    # Draw phase regions (colored areas inside the triangle)
+    for phase, coords in phase_regions.items():
+        phase_patch = patches.Polygon(coords, closed=True, facecolor=phase_colors[phase], edgecolor='black', lw=2, alpha=0.5)
+        ax.add_patch(phase_patch)
+
+    # Draw phase boundary lines
+    boundary_lines = [
+        [(0.0, 0.0), (0.4, 0.0), (0.2, 0.3)],  # α region boundary
+        [(0.4, 0.0), (1.0, 0.0), (0.7, 0.6), (0.2, 0.3)],  # β region boundary
+        [(0.2, 0.3), (0.7, 0.6), (0.5, np.sqrt(3)/2)]  # γ region boundary
+    ]
+    
+    # Draw boundaries between phases
+    for line in boundary_lines:
+        ax.plot(*zip(*line), color='black', lw=2)
 
     # Grid lines
     for i in range(5, 100, 5):
