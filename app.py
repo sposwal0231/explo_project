@@ -30,6 +30,13 @@ phase_regions = {
     "γ": [(0.2, 0.3), (0.7, 0.6), (0.5, np.sqrt(3)/2)]
 }
 
+# Define phase colors
+phase_colors = {
+    "α": "lightblue",
+    "β": "lightgreen",
+    "γ": "lightcoral"
+}
+
 # Determine which phase the composition falls into
 def get_phase(x, y):
     for phase, coords in phase_regions.items():
@@ -49,6 +56,11 @@ else:
     # Plot setup
     fig, ax = plt.subplots(figsize=(7, 7))
     ax.set_facecolor("white")  # Light background
+
+    # Draw phase regions
+    for phase, coords in phase_regions.items():
+        phase_patch = patches.Polygon(coords, closed=True, facecolor=phase_colors[phase], edgecolor='black', lw=2, alpha=0.5)
+        ax.add_patch(phase_patch)
 
     # Draw main triangle
     triangle_coords = np.array([[0, 0], [1, 0], [0.5, np.sqrt(3)/2]])
