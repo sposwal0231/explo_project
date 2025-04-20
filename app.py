@@ -6,7 +6,7 @@ import matplotlib.patches as mpatches
 from matplotlib.path import Path
 import io
 
-st.title("Ternary Diagram with Phase Regions, Boundaries, Legend, and Result")
+st.title("Gibb's Triangle with Phase Regions")
 
 A = st.slider("Component A (%)", 0, 100, step=5, value=50)
 B = st.slider("Component B (%)", 0, 100 - A, step=5, value=35)
