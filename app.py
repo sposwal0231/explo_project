@@ -55,54 +55,55 @@ else:
 
     # Plot setup
     fig, ax = plt.subplots(figsize=(7, 7))
-    ax.set_facecolor("white")  # Light background
+    ax.set_facecolor("white")
 
     # Draw main triangle
     triangle_coords = np.array([[0, 0], [1, 0], [0.5, np.sqrt(3)/2]])
     triangle_patch = patches.Polygon(triangle_coords, closed=True, facecolor="white", edgecolor='black', lw=2)
     ax.add_patch(triangle_patch)
 
-    # Draw phase regions (colored areas inside the triangle)
+    # Draw phase regions
     for phase, coords in phase_regions.items():
         phase_patch = patches.Polygon(coords, closed=True, facecolor=phase_colors[phase], edgecolor='black', lw=2, alpha=0.5)
         ax.add_patch(phase_patch)
 
-    # Draw phase boundary lines inside the triangle
+    # Draw boundaries between phases
     boundary_lines = [
-        [(0.0, 0.0), (0.4, 0.0), (0.2, 0.3)],  # α region boundary
-        [(0.4, 0.0), (1.0, 0.0), (0.7, 0.6), (0.2, 0.3)],  # β region boundary
-        [(0.2, 0.3), (0.7, 0.6), (0.5, np.sqrt(3)/2)]  # γ region boundary
+        [(0.0, 0.0), (0.4, 0.0), (0.2, 0.3)],
+        [(0.4, 0.0), (1.0, 0.0), (0.7, 0.6), (0.2, 0.3)],
+        [(0.2, 0.3), (0.7, 0.6), (0.5, np.sqrt(3)/2)]
     ]
     
-    # Draw boundaries between phases
     for line in boundary_lines:
         ax.plot(*zip(*line), color='black', lw=2)
 
-    # Grid lines
+    # Modified grid lines and labels (5% increments, bold uniform style)
     for i in range(5, 100, 5):
         f = i / 100
-        is_major = i % 10 == 0
-        color = 'black' if is_major else 'gray'
-        lw = 1.5 if is_major else 0.8
-        ls = '-' if is_major else '--'
-        fontsize = 8 if is_major else 6
-        fontweight = 'bold' if is_major else 'normal'
+        color = 'black'
+        lw = 1.5
+        ls = '-'
+        fontsize = 8
+        fontweight = 'bold'
 
         # Draw grid lines
         ax.plot([f/2, 1 - f/2], [f*np.sqrt(3)/2]*2, color=color, lw=lw, ls=ls)
         ax.plot([f, (1 + f)/2], [0, (1 - f)*np.sqrt(3)/2], color=color, lw=lw, ls=ls)
         ax.plot([(1 - f)/2, 1 - f], [(1 - f)*np.sqrt(3)/2, 0], color=color, lw=lw, ls=ls)
 
-        # Labels
-        ax.text(f, -0.04, f"{i}", ha='center', va='top', fontsize=fontsize, fontweight=fontweight, color=color)
-        ax.text((1 + f)/2 + 0.03, (1 - f)*np.sqrt(3)/2, f"{100-i}", ha='left', fontsize=fontsize, fontweight=fontweight, color=color)
-        ax.text((1 - f)/2 - 0.03, (1 - f)*np.sqrt(3)/2, f"{i}", ha='right', fontsize=fontsize, fontweight=fontweight, color=color)
+        # Axis labels (all decreasing from 95% to 5%)
+        ax.text(f, -0.04, f"{100 - i}", ha='center', va='top', 
+                fontsize=fontsize, fontweight=fontweight, color=color)  # B-axis
+        ax.text((1 + f)/2 + 0.03, (1 - f)*np.sqrt(3)/2, f"{100 - i}", ha='left', 
+                fontsize=fontsize, fontweight=fontweight, color=color)  # C-axis
+        ax.text((1 - f)/2 - 0.03, (1 - f)*np.sqrt(3)/2, f"{100 - i}", ha='right', 
+                fontsize=fontsize, fontweight=fontweight, color=color)  # A-axis
 
     # Plot user point
     ax.plot(x, y, 'ro', markersize=8)
     ax.text(x, y + 0.035, f"({A}, {B}, {C})", ha='center', fontsize=10, fontweight='bold', color='black')
 
-    # Corner labels
+    # Corner labels (match screenshot positions)
     ax.text(-0.05, -0.05, "B (100%)", ha='right', fontsize=11, fontweight='bold', color='blue')
     ax.text(1.05, -0.05, "C (100%)", ha='left', fontsize=11, fontweight='bold', color='green')
     ax.text(0.5, np.sqrt(3)/2 + 0.05, "A (100%)", ha='center', fontsize=11, fontweight='bold', color='orange')
