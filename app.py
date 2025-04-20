@@ -3,42 +3,43 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.patches as patches
 from matplotlib.path import Path
+import io
 
-# Title and description
-st.title("Gibb's Traingle with Phase Regions")
-st.markdown("""
-Adjust components **A** and **B**. Component **C** is calculated automatically.  
-Your selected composition will be placed on the triangle and the corresponding **phase region** will be shown.
-""")
+st.title("Ternary Diagram with Dynamic Highlighting and Download")
 
-# Component sliders
-A = st.slider("Component A (%)", 0, 100, step=5, value=30)
+A = st.slider("Component A (%)", 0, 100, step=5, value=50)
 B = st.slider("Component B (%)", 0, 100 - A, step=5, value=30)
 C = 100 - A - B
 
 def ternary_to_cartesian(a, b, c):
     total = a + b + c
-    # A at top, B at bottom left, C at bottom right
     x = 0.5 * (2 * c + a) / total
     y = (np.sqrt(3) / 2) * a / total
     return x, y
 
-# Vertices for the main triangle
 A_vertex = (0.5, np.sqrt(3)/2)
 B_vertex = (0, 0)
 C_vertex = (1, 0)
 
-# Phase regions: All coordinates are within the triangle
-phase_regions = {
-    "α": [B_vertex, (0.25, np.sqrt(3)/4), (0.5, 0), (0.25, 0)],
-    "β": [(0.25, np.sqrt(3)/4), (0.5, 0), (0.75, np.sqrt(3)/4), (0.5, np.sqrt(3)/2)],
-    "γ": [(0.5, 0), C_vertex, (0.75, np.sqrt(3)/4)]
-}
+# Example: Three arbitrary phase regions (triangle-based for clarity)
+region_alpha = [B_vertex, (0.35, 0.2), (0.2, 0.5), A_vertex]
+region_beta = [(0.35, 0.2), (0.7, 0.2), (0.8, 0.5), (0.2, 0.5)]
+region_gamma = [(0.7, 0.2), C_vertex, A_vertex, (0.8, 0.5)]
 
+phase_regions = {
+    "α": region_alpha,
+    "β": region_beta,
+    "γ": region_gamma
+}
 phase_colors = {
-    "α": "lightblue",
-    "β": "lightgreen",
-    "γ": "lightcoral"
+    "α": "#b3c6ff",    # light blue
+    "β": "#b3ffb3",    # light green
+    "γ": "#ffb3b3"     # light coral
+}
+highlight_colors = {
+    "α": "#3366ff",    # strong blue
+    "β": "#33cc33",    # strong green
+    "γ": "#ff3333"     # strong red
 }
 
 def get_phase(x, y):
@@ -48,83 +49,74 @@ def get_phase(x, y):
             return phase
     return "Unknown"
 
-if A + B > 100:
-    st.error("Invalid input: A + B exceeds 100%")
-else:
-    x, y = ternary_to_cartesian(A, B, C)
-    phase = get_phase(x, y)
-    st.success(f"Composition: A = {A}%, B = {B}%, C = {C}% → Phase: **{phase}**")
+x, y = ternary_to_cartesian(A, B, C)
+phase = get_phase(x, y)
 
-    fig, ax = plt.subplots(figsize=(7, 7))
-    ax.set_facecolor("white")
+fig, ax = plt.subplots(figsize=(7, 7))
+ax.set_facecolor("white")
 
-    # Main triangle (A at top, B at bottom left, C at bottom right)
-    triangle_coords = np.array([B_vertex, C_vertex, A_vertex])
-    triangle_patch = patches.Polygon(triangle_coords, closed=True, facecolor="white", edgecolor='black', lw=2)
-    ax.add_patch(triangle_patch)
+# Draw main triangle
+triangle_coords = np.array([B_vertex, C_vertex, A_vertex])
+triangle_patch = patches.Polygon(triangle_coords, closed=True, facecolor="white", edgecolor='black', lw=2)
+ax.add_patch(triangle_patch)
 
-    # Phase regions, clipped to the triangle
-    for phase, coords in phase_regions.items():
-        phase_patch = patches.Polygon(coords, closed=True, facecolor=phase_colors[phase], edgecolor='black', lw=2, alpha=0.4)
-        phase_patch.set_clip_path(triangle_patch)
-        ax.add_patch(phase_patch)
+# Draw phase regions with dynamic highlighting
+for p, coords in phase_regions.items():
+    color = highlight_colors[p] if p == phase else phase_colors[p]
+    alpha = 0.7 if p == phase else 0.2
+    phase_patch = patches.Polygon(coords, closed=True, facecolor=color, edgecolor='black', lw=2, alpha=alpha, zorder=1)
+    phase_patch.set_clip_path(triangle_patch)
+    ax.add_patch(phase_patch)
 
-    # Draw triangle boundary again for clarity
-    ax.plot(*zip(*(triangle_coords.tolist() + [triangle_coords[0].tolist()])), color='black', lw=2)
+# Draw phase boundaries
+for coords in phase_regions.values():
+    ax.plot(*zip(*(coords + [coords[0]])), color='black', lw=2)
 
-    # Grid system with tiered styling
-    for i in range(5, 100, 5):
-        f = i / 100
-        is_major = i % 10 == 0  # Check for multiples of 10
-        
-        # Style configuration
-        if is_major:
-            color = '#404040'  # Dark gray
-            lw = 2
-            fontsize = 10
-            fontweight = 'bold'
-        else:
-            color = '#808080'  # Medium gray
-            lw = 1.5
-            fontsize = 8
-            fontweight = 'normal'
+# Draw grid lines
+for i in range(5, 100, 5):
+    f = i / 100
+    is_major = i % 10 == 0
+    color = '#404040' if is_major else '#808080'
+    lw = 2 if is_major else 1.5
+    fontsize = 10 if is_major else 8
+    fontweight = 'bold' if is_major else 'normal'
+    ax.plot([f/2, 1 - f/2], [f*np.sqrt(3)/2]*2, color=color, lw=lw, ls='-')
+    ax.plot([f, (1 + f)/2], [0, (1 - f)*np.sqrt(3)/2], color=color, lw=lw, ls='-')
+    ax.plot([(1 - f)/2, 1 - f], [(1 - f)*np.sqrt(3)/2, 0], color=color, lw=lw, ls='-')
+    ax.text(f, -0.04, f"{100 - i}", ha='center', va='top', fontsize=fontsize, fontweight=fontweight, color=color)
+    ax.text((1 + f)/2 + 0.03, (1 - f)*np.sqrt(3)/2, f"{100 - i}", ha='left', fontsize=fontsize, fontweight=fontweight, color=color)
+    ax.text((1 - f)/2 - 0.03, (1 - f)*np.sqrt(3)/2, f"{100 - i}", ha='right', fontsize=fontsize, fontweight=fontweight, color=color)
 
-        # Draw grid lines
-        # A-axis (bottom, left to right)
-        ax.plot([f/2, 1 - f/2], [f*np.sqrt(3)/2]*2, color=color, lw=lw, ls='-')
-        # B-axis (right, up to top)
-        ax.plot([f, (1 + f)/2], [0, (1 - f)*np.sqrt(3)/2], color=color, lw=lw, ls='-')
-        # C-axis (left, up to top)
-        ax.plot([(1 - f)/2, 1 - f], [(1 - f)*np.sqrt(3)/2, 0], color=color, lw=lw, ls='-')
+# User point
+ax.plot(x, y, 'ro', markersize=10, zorder=2)
+ax.text(x, y + 0.035, f"({A}, {B}, {C})", ha='center', fontsize=11, fontweight='bold', color='black', zorder=3)
 
-        # Add labels
-        ax.text(f, -0.04, f"{100-i}", ha='center', va='top', 
-                fontsize=fontsize, fontweight=fontweight, color=color)  # C-axis
-        ax.text((1 + f)/2 + 0.03, (1 - f)*np.sqrt(3)/2, f"{i}", ha='left', 
-                fontsize=fontsize, fontweight=fontweight, color=color)  # A-axis
-        ax.text((1 - f)/2 - 0.03, (1 - f)*np.sqrt(3)/2, f"{100-i}", ha='right', 
-                fontsize=fontsize, fontweight=fontweight, color=color)  # B-axis
+# Vertex labels
+ax.text(0.5, np.sqrt(3)/2 + 0.05, "A (100%)", ha='center', fontsize=13, fontweight='bold', color='orange')
+ax.text(-0.05, -0.05, "B (100%)", ha='right', fontsize=13, fontweight='bold', color='blue')
+ax.text(1.05, -0.05, "C (100%)", ha='left', fontsize=13, fontweight='bold', color='green')
 
-    # User point
-    ax.plot(x, y, 'ro', markersize=8)
-    ax.text(x, y + 0.035, f"({A}, {B}, {C})", ha='center', fontsize=10, fontweight='bold', color='black')
+# Add legend for phase colors
+legend_patches = [
+    patches.Patch(color=highlight_colors["α"], label="Phase α (highlighted)"),
+    patches.Patch(color=highlight_colors["β"], label="Phase β (highlighted)"),
+    patches.Patch(color=highlight_colors["γ"], label="Phase γ (highlighted)")
+]
+ax.legend(handles=legend_patches, loc='upper center', bbox_to_anchor=(0.5, -0.08), ncol=3, frameon=True)
 
-    # Vertex labels
-    ax.text(0.5, np.sqrt(3)/2 + 0.05, "A (100%)", ha='center', fontsize=13, fontweight='bold', color='orange')
-    ax.text(-0.05, -0.05, "B (100%)", ha='right', fontsize=13, fontweight='bold', color='blue')
-    ax.text(1.05, -0.05, "C (100%)", ha='left', fontsize=13, fontweight='bold', color='green')
+ax.set_aspect('equal', adjustable='datalim')
+ax.set_xlim(0, 1)
+ax.set_ylim(0, np.sqrt(3)/2)
+ax.axis('off')
 
-    # Add legend for phase colors
-    legend_patches = [
-        patches.Patch(color=phase_colors["α"], label="Phase α (light blue)"),
-        patches.Patch(color=phase_colors["β"], label="Phase β (light green)"),
-        patches.Patch(color=phase_colors["γ"], label="Phase γ (light coral)")
-    ]
-    ax.legend(handles=legend_patches, loc='upper center', bbox_to_anchor=(0.5, -0.08), ncol=3, frameon=True)
+st.pyplot(fig)
 
-    # Set aspect ratio and limits for perfect equilateral triangle
-    ax.set_aspect('equal', adjustable='datalim')
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, np.sqrt(3)/2)
-    ax.axis('off')
-    st.pyplot(fig)
+# --- Download Feature ---
+buf = io.BytesIO()
+fig.savefig(buf, format="png", bbox_inches="tight")
+st.download_button(
+    label="Download diagram as PNG",
+    data=buf.getvalue(),
+    file_name="ternary_diagram.png",
+    mime="image/png"
+)
