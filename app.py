@@ -16,7 +16,6 @@ A = st.slider("Component A (%)", 0, 100, step=5, value=30)
 B = st.slider("Component B (%)", 0, 100 - A, step=5, value=30)
 C = 100 - A - B
 
-# --- Corrected mapping function ---
 def ternary_to_cartesian(a, b, c):
     total = a + b + c
     # A at top, B at bottom left, C at bottom right
@@ -24,12 +23,19 @@ def ternary_to_cartesian(a, b, c):
     y = (np.sqrt(3) / 2) * a / total
     return x, y
 
-# --- Phase regions (coordinates in triangle space) ---
+# Vertices for the main triangle
+A_vertex = (0.5, np.sqrt(3)/2)
+B_vertex = (0, 0)
+C_vertex = (1, 0)
+
+# Phase regions: All coordinates are within the triangle
 phase_regions = {
-    "α": [(0.0, 0.0), (0.4, 0.0), (0.2, 0.3)],
-    "β": [(0.4, 0.0), (1.0, 0.0), (0.7, 0.6), (0.2, 0.3)],
-    "γ": [(0.2, 0.3), (0.7, 0.6), (0.5, np.sqrt(3)/2)]
+    "α": [B_vertex, (0.25, np.sqrt(3)/4), (0, 0), (0.25, 0)],  # Lower left
+    "β": [(0.25, np.sqrt(3)/4), (0.5, 0), (0.75, np.sqrt(3)/4), (0.5, np.sqrt(3)/2)],  # Center and top
+    "γ": [(0.5, 0), C_vertex, (0.75, np.sqrt(3)/4)]  # Lower right
 }
+
+# For a more visually distinct split, you can adjust the above polygons as you like
 
 phase_colors = {
     "α": "lightblue",
@@ -38,6 +44,7 @@ phase_colors = {
 }
 
 def get_phase(x, y):
+    # Use the center of each region for a simple phase assignment
     for phase, coords in phase_regions.items():
         path = Path(coords)
         if path.contains_point((x, y)):
@@ -55,27 +62,20 @@ else:
     ax.set_facecolor("white")
 
     # Main triangle (A at top, B at bottom left, C at bottom right)
-    triangle_coords = np.array([[0, 0], [1, 0], [0.5, np.sqrt(3)/2]])
+    triangle_coords = np.array([B_vertex, C_vertex, A_vertex])
     triangle_patch = patches.Polygon(triangle_coords, closed=True, facecolor="white", edgecolor='black', lw=2)
     ax.add_patch(triangle_patch)
 
-    # Phase regions, now clipped to the triangle
+    # Phase regions, clipped to the triangle
     for phase, coords in phase_regions.items():
-        phase_patch = patches.Polygon(coords, closed=True, facecolor=phase_colors[phase], edgecolor='black', lw=2, alpha=0.5)
+        phase_patch = patches.Polygon(coords, closed=True, facecolor=phase_colors[phase], edgecolor='black', lw=2, alpha=0.4)
         phase_patch.set_clip_path(triangle_patch)
         ax.add_patch(phase_patch)
 
-    # Phase boundaries
-    boundary_lines = [
-        [(0.0, 0.0), (0.4, 0.0), (0.2, 0.3)],
-        [(0.4, 0.0), (1.0, 0.0), (0.7, 0.6), (0.2, 0.3)],
-        [(0.2, 0.3), (0.7, 0.6), (0.5, np.sqrt(3)/2)]
-    ]
-    
-    for line in boundary_lines:
-        ax.plot(*zip(*line), color='black', lw=2)
+    # Draw triangle boundary again for clarity
+    ax.plot(*zip(*(triangle_coords.tolist() + [triangle_coords[0].tolist()])), color='black', lw=2)
 
-    # Modified grid system with tiered styling
+    # Grid system with tiered styling
     for i in range(5, 100, 5):
         f = i / 100
         is_major = i % 10 == 0  # Check for multiples of 10
@@ -113,10 +113,13 @@ else:
     ax.text(x, y + 0.035, f"({A}, {B}, {C})", ha='center', fontsize=10, fontweight='bold', color='black')
 
     # Vertex labels
-    ax.text(0.5, np.sqrt(3)/2 + 0.05, "A (100%)", ha='center', fontsize=11, fontweight='bold', color='orange')
-    ax.text(-0.05, -0.05, "B (100%)", ha='right', fontsize=11, fontweight='bold', color='blue')
-    ax.text(1.05, -0.05, "C (100%)", ha='left', fontsize=11, fontweight='bold', color='green')
+    ax.text(0.5, np.sqrt(3)/2 + 0.05, "A (100%)", ha='center', fontsize=13, fontweight='bold', color='orange')
+    ax.text(-0.05, -0.05, "B (100%)", ha='right', fontsize=13, fontweight='bold', color='blue')
+    ax.text(1.05, -0.05, "C (100%)", ha='left', fontsize=13, fontweight='bold', color='green')
 
-    ax.set_aspect('equal')
+    # Set aspect ratio and limits for perfect equilateral triangle
+    ax.set_aspect('equal', adjustable='datalim')
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, np.sqrt(3)/2)
     ax.axis('off')
     st.pyplot(fig)
