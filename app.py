@@ -47,50 +47,42 @@ else:
     st.success(f"Composition: A = {A}%, B = {B}%, C = {C}% → Phase: **{phase}**")
 
     # Plot setup
-    fig, ax = plt.subplots(figsize=(8, 8))  # Increased size
+    fig, ax = plt.subplots(figsize=(8, 8))  # Size increased by 1 unit
     ax.set_facecolor("#1e1e1e")  # Dark background
 
     # Draw main triangle
     triangle_coords = np.array([[0, 0], [1, 0], [0.5, np.sqrt(3)/2]])
-    triangle_patch = patches.Polygon(
-        triangle_coords, closed=True, facecolor="#2e2e2e",
-        edgecolor='white', lw=2, zorder=2
-    )
+    triangle_patch = patches.Polygon(triangle_coords, closed=True, facecolor="#2e2e2e", edgecolor='white', lw=2)
     ax.add_patch(triangle_patch)
-    triangle_path = Path(triangle_coords)
 
-    # Draw phase regions (clipped to triangle)
+    # Draw phase regions (clip strictly inside triangle)
     phase_colors = {'α': '#4f81bd', 'β': '#f58f82', 'γ': '#93d19b'}
     for phase, coords in phase_regions.items():
-        patch = patches.Polygon(
-            coords, closed=True, facecolor=phase_colors[phase],
-            alpha=0.7, label=f"Phase {phase}"
-        )
-        patch.set_clip_path(triangle_patch)
-        patch.set_clip_on(True)
+        patch = patches.Polygon(coords, closed=True, facecolor=phase_colors[phase], alpha=0.7, label=f"Phase {phase}")
+        patch.set_clip_path(triangle_patch, transform=ax.transData)
         ax.add_patch(patch)
 
-    # Grid lines and labels
+    # Grid lines and composition labels
     for i in range(5, 100, 5):
         f = i / 100
         is_major = i % 10 == 0
-        color = '#ffffff' if is_major else '#aaaaaa'  # Improved contrast
+        color = '#ffffff' if is_major else '#cccccc'  # More readable
         lw = 1.5 if is_major else 0.8
         ls = '-' if is_major else '--'
         fontsize = 8 if is_major else 6
         fontweight = 'bold' if is_major else 'normal'
 
-        # Draw grid lines
+        # Grid lines
         ax.plot([f/2, 1 - f/2], [f*np.sqrt(3)/2]*2, color=color, lw=lw, ls=ls)
         ax.plot([f, (1 + f)/2], [0, (1 - f)*np.sqrt(3)/2], color=color, lw=lw, ls=ls)
         ax.plot([(1 - f)/2, 1 - f], [(1 - f)*np.sqrt(3)/2, 0], color=color, lw=lw, ls=ls)
 
-        # Labels
+        # Composition Labels
         ax.text(f, -0.04, f"{100 - i}", ha='center', va='top', fontsize=fontsize, fontweight=fontweight, color=color)
         ax.text((1 + f)/2 + 0.03, (1 - f)*np.sqrt(3)/2, f"{i}", ha='left', fontsize=fontsize, fontweight=fontweight, color=color)
         ax.text((1 - f)/2 - 0.03, (1 - f)*np.sqrt(3)/2, f"{i}", ha='right', fontsize=fontsize, fontweight=fontweight, color=color)
 
-    # Plot user point
+    # Plot the user’s selected composition point
     ax.plot(x, y, 'ro', markersize=8)
     ax.text(x, y + 0.035, f"({A}, {B}, {C})", ha='center', fontsize=10, fontweight='bold', color='white')
 
