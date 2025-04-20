@@ -2,9 +2,10 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.patches as patches
+import matplotlib.patches as mpatches
 import io
 
-st.title("Ternary Diagram with Phase Regions and Download")
+st.title("Ternary Diagram with Phase Regions, Legend, and Download")
 
 A = st.slider("Component A (%)", 0, 100, step=5, value=50)
 B = st.slider("Component B (%)", 0, 100 - A, step=5, value=30)
@@ -20,11 +21,11 @@ A_vertex = (0.5, np.sqrt(3)/2)
 B_vertex = (0, 0)
 C_vertex = (1, 0)
 
-# Define phase boundary lines (as in your image)
+# Phase boundary lines (as in your image)
 boundary1 = [ternary_to_cartesian(70, 30, 0), ternary_to_cartesian(20, 60, 20)]
 boundary2 = [ternary_to_cartesian(20, 60, 20), ternary_to_cartesian(0, 20, 80)]
 
-# Phase region polygons (manually traced from your image)
+# Phase region polygons (traced from your image)
 region_alpha = [B_vertex, ternary_to_cartesian(70, 30, 0), ternary_to_cartesian(20, 60, 20)]
 region_beta = [ternary_to_cartesian(70, 30, 0), A_vertex, C_vertex, ternary_to_cartesian(0, 20, 80), ternary_to_cartesian(20, 60, 20)]
 region_gamma = [B_vertex, ternary_to_cartesian(20, 60, 20), ternary_to_cartesian(0, 20, 80), C_vertex]
@@ -35,9 +36,9 @@ phase_regions = {
     "γ": region_gamma
 }
 phase_colors = {
-    "α": "#b3c6ff",    # light blue
+    "α": "#ffb3b3",    # light red
     "β": "#b3ffb3",    # light green
-    "γ": "#ffb3b3"     # light coral
+    "γ": "#b3c6ff"     # light blue
 }
 
 def get_phase(x, y):
@@ -94,6 +95,14 @@ ax.text(x, y + 0.035, f"({A}, {B}, {C})", ha='center', fontsize=12, fontweight='
 ax.text(0.5, np.sqrt(3)/2 + 0.05, "A (100%)", ha='center', fontsize=15, fontweight='bold', color='orange')
 ax.text(-0.05, -0.05, "B (100%)", ha='right', fontsize=15, fontweight='bold', color='blue')
 ax.text(1.05, -0.05, "C (100%)", ha='left', fontsize=15, fontweight='bold', color='green')
+
+# Add legend for phase regions
+legend_patches = [
+    mpatches.Patch(color="#ffb3b3", label="Phase α (red, top)"),
+    mpatches.Patch(color="#b3ffb3", label="Phase β (green, bottom right)"),
+    mpatches.Patch(color="#b3c6ff", label="Phase γ (blue, bottom left)")
+]
+ax.legend(handles=legend_patches, loc='upper center', bbox_to_anchor=(0.5, -0.08), ncol=3, frameon=True)
 
 ax.set_aspect('equal', adjustable='datalim')
 ax.set_xlim(0, 1)
