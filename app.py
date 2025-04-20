@@ -24,8 +24,7 @@ def ternary_to_cartesian(a, b, c):
     y = (np.sqrt(3) / 2) * c / total
     return x, y
 
-# Define phase regions as triangle areas
-# You can modify these boundaries for real systems
+# Define phase regions as triangle areas (keeping them inside the ternary triangle)
 phase_regions = {
     "α": [(0.0, 0.0), (0.4, 0.0), (0.2, 0.3)],
     "β": [(0.4, 0.0), (1.0, 0.0), (0.7, 0.6), (0.2, 0.3)],
@@ -82,7 +81,7 @@ else:
         ax.text((1 + f)/2 + 0.03, (1 - f) * np.sqrt(3)/2, f"{i}", ha='left', fontsize=fontsize, fontweight=fontweight, color=color)
         ax.text((1 - f)/2 - 0.03, (1 - f) * np.sqrt(3)/2, f"{i}", ha='right', fontsize=fontsize, fontweight=fontweight, color=color)
 
-    # Outer triangle
+    # Outer triangle (border)
     ax.plot([0, 1, 0.5, 0], [0, 0, np.sqrt(3)/2, 0], 'w', lw=2)
 
     # Point
