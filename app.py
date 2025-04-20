@@ -18,24 +18,29 @@ def ternary_to_cartesian(a, b, c):
     y = (np.sqrt(3) / 2) * a / total
     return x, y
 
+# Triangle vertices
 A_vertex = (0.5, np.sqrt(3)/2)
 B_vertex = (0, 0)
 C_vertex = (1, 0)
 
-# Phase boundary points (intersection point is where all three regions meet)
-pt1 = ternary_to_cartesian(70, 30, 0)        # Boundary between α and β
-pt2 = ternary_to_cartesian(20, 60, 20)       # Intersection point (α, β, γ meet)
-pt3 = ternary_to_cartesian(0, 20, 80)        # Boundary between β and γ
+# Key boundary/intersection points (from your diagram)
+# Intersection (triple point) visually estimated from the diagram
+intersection = ternary_to_cartesian(40, 40, 20)  # Adjust as needed for your phase boundary
 
-# Phase boundary lines
-boundary1 = [pt1, pt2]        # α/β
-boundary2 = [pt2, pt3]        # β/γ
-boundary3 = [B_vertex, pt2]   # α/γ (from vertex B to intersection point)
+# Where red/green boundary meets left edge (B-A)
+left_boundary = ternary_to_cartesian(70, 30, 0)
+# Where green/blue boundary meets bottom edge (B-C)
+bottom_boundary = ternary_to_cartesian(0, 20, 80)
 
-# Phase region polygons (corrected so α starts at B and is bounded by bold lines and triangle edge)
-region_alpha = [B_vertex, pt2, A_vertex, pt1]
-region_beta = [pt2, pt3, C_vertex, A_vertex]
-region_gamma = [B_vertex, pt2, pt3]
+# Phase boundaries
+boundary1 = [left_boundary, intersection]      # α/β (red/green)
+boundary2 = [intersection, bottom_boundary]    # β/γ (green/blue)
+boundary3 = [B_vertex, intersection]           # α/γ (red/blue)
+
+# Phase region polygons
+region_alpha = [B_vertex, intersection, A_vertex, left_boundary]
+region_beta  = [intersection, bottom_boundary, C_vertex, A_vertex, left_boundary]
+region_gamma = [B_vertex, intersection, bottom_boundary, C_vertex]
 
 phase_regions = {
     "α": region_alpha,
@@ -73,11 +78,9 @@ ax.plot(*zip(*boundary3), color='black', lw=3, zorder=2)
 
 # Draw main triangle
 triangle_coords = np.array([B_vertex, C_vertex, A_vertex])
-triangle_patch = patches.Polygon(triangle_coords, closed=True, facecolor="none", edgecolor='black', lw=2)
-ax.add_patch(triangle_patch)
 ax.plot(*zip(*(triangle_coords.tolist() + [triangle_coords[0].tolist()])), color='black', lw=2, zorder=3)
 
-# Draw grid lines
+# Draw grid lines (as in your image)
 for i in range(5, 100, 5):
     f = i / 100
     is_major = i % 10 == 0
@@ -85,11 +88,9 @@ for i in range(5, 100, 5):
     lw = 2 if is_major else 1.5
     fontsize = 10 if is_major else 8
     fontweight = 'bold' if is_major else 'normal'
-
     ax.plot([f/2, 1 - f/2], [f*np.sqrt(3)/2]*2, color=color, lw=lw, ls='-')
     ax.plot([f, (1 + f)/2], [0, (1 - f)*np.sqrt(3)/2], color=color, lw=lw, ls='-')
     ax.plot([(1 - f)/2, 1 - f], [(1 - f)*np.sqrt(3)/2, 0], color=color, lw=lw, ls='-')
-
     ax.text(f, -0.04, f"{100 - i}", ha='center', va='top', fontsize=fontsize, fontweight=fontweight, color=color)
     ax.text((1 + f)/2 + 0.03, (1 - f)*np.sqrt(3)/2, f"{100 - i}", ha='left', fontsize=fontsize, fontweight=fontweight, color=color)
     ax.text((1 - f)/2 - 0.03, (1 - f)*np.sqrt(3)/2, f"{100 - i}", ha='right', fontsize=fontsize, fontweight=fontweight, color=color)
@@ -98,10 +99,10 @@ for i in range(5, 100, 5):
 ax.plot(x, y, 'ro', markersize=12, zorder=4)
 ax.text(x, y + 0.035, f"({A}, {B}, {C})", ha='center', fontsize=12, fontweight='bold', color='black', zorder=5)
 
-# Vertex labels
-ax.text(0.5, np.sqrt(3)/2 + 0.05, "A (100%)", ha='center', fontsize=15, fontweight='bold', color='orange')
-ax.text(-0.05, -0.05, "B (100%)", ha='right', fontsize=15, fontweight='bold', color='blue')
-ax.text(1.05, -0.05, "C (100%)", ha='left', fontsize=15, fontweight='bold', color='green')
+# Vertex labels (as in your image)
+ax.text(0.5, np.sqrt(3)/2 + 0.06, "A (100%)", ha='center', fontsize=17, fontweight='bold', color='orange')
+ax.text(-0.05, -0.05, "B (100%)", ha='right', fontsize=17, fontweight='bold', color='blue')
+ax.text(1.05, -0.05, "C (100%)", ha='left', fontsize=17, fontweight='bold', color='green')
 
 # Add legend for phase regions
 legend_patches = [
