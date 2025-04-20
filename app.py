@@ -4,8 +4,6 @@ import numpy as np
 import matplotlib.patches as patches
 from matplotlib.path import Path
 
-st.set_page_config(layout="wide")  # Optional: Wider Streamlit layout
-
 # Title and description
 st.title("🌑 Ternary Diagram (Dark Theme) with Phase Regions")
 st.markdown("""
@@ -13,26 +11,26 @@ Adjust components **A** and **B**. Component **C** is calculated automatically.
 Your selected composition will be placed on the triangle and the corresponding **phase region** will be shown.
 """)
 
-# Sliders for component selection
+# Component sliders
 A = st.slider("Component A (%)", 0, 100, step=5, value=30)
 B = st.slider("Component B (%)", 0, 100 - A, step=5, value=30)
 C = 100 - A - B
 
-# Ternary to Cartesian
+# Convert ternary to Cartesian coordinates
 def ternary_to_cartesian(a, b, c):
     total = a + b + c
     x = 0.5 * (2 * b + c) / total
     y = (np.sqrt(3) / 2) * c / total
     return x, y
 
-# Phase region definitions
+# Define phase regions (in cartesian space)
 phase_regions = {
     "α": [(0.0, 0.0), (0.4, 0.0), (0.2, 0.3)],
     "β": [(0.4, 0.0), (1.0, 0.0), (0.7, 0.6), (0.2, 0.3)],
     "γ": [(0.2, 0.3), (0.7, 0.6), (0.5, np.sqrt(3)/2)]
 }
 
-# Find which region the point lies in
+# Determine which phase the composition falls into
 def get_phase(x, y):
     for phase, coords in phase_regions.items():
         path = Path(coords)
@@ -40,7 +38,7 @@ def get_phase(x, y):
             return phase
     return "Unknown"
 
-# Check composition sum
+# Composition check
 if A + B > 100:
     st.error("Invalid input: A + B exceeds 100%")
 else:
@@ -48,57 +46,58 @@ else:
     phase = get_phase(x, y)
     st.success(f"Composition: A = {A}%, B = {B}%, C = {C}% → Phase: **{phase}**")
 
-    # Plot
-    fig, ax = plt.subplots(figsize=(9, 9))  # Increased size
+    # Plot setup
+    fig, ax = plt.subplots(figsize=(7, 7))  # Restored original size
+    ax.set_facecolor("#1e1e1e")  # Dark background
 
-    ax.set_facecolor("#1e1e1e")
-    ax.set_xlim(-0.2, 1.2)
-    ax.set_ylim(-0.2, 1.1)
-
+    # Main triangle
     triangle_coords = np.array([[0, 0], [1, 0], [0.5, np.sqrt(3)/2]])
     triangle_path = Path(triangle_coords)
+
+    # Visible triangle
     triangle_patch = patches.Polygon(triangle_coords, closed=True, facecolor="#2e2e2e", edgecolor='white', lw=2)
     ax.add_patch(triangle_patch)
 
-    # Phase regions with proper clipping
-    clip_patch = patches.PathPatch(triangle_path, transform=ax.transData)
+    # Clipping path (invisible, only for clipping)
+    clip_patch = patches.PathPatch(triangle_path, facecolor='none')
+    
+    # Phase regions
     phase_colors = {'α': '#4f81bd', 'β': '#f58f82', 'γ': '#93d19b'}
-
     for phase, coords in phase_regions.items():
-        region = patches.Polygon(coords, closed=True, facecolor=phase_colors[phase], alpha=0.7, label=f"Phase {phase}")
-        region.set_clip_path(clip_patch)
-        ax.add_patch(region)
+        patch = patches.Polygon(coords, closed=True, facecolor=phase_colors[phase], alpha=0.7, label=f"Phase {phase}")
+        patch.set_clip_path(clip_patch)
+        ax.add_patch(patch)
 
-    # Grid lines and side numbers
+    # Grid lines and composition labels
     for i in range(5, 100, 5):
         f = i / 100
         is_major = i % 10 == 0
-        color = '#eeeeee' if is_major else '#888888'  # Better readability
+        color = '#cccccc' if is_major else '#666666'
         lw = 1.5 if is_major else 0.8
         ls = '-' if is_major else '--'
-        fontsize = 9 if is_major else 7
+        fontsize = 8 if is_major else 6
         fontweight = 'bold' if is_major else 'normal'
 
-        # Draw grid lines
+        # Grid lines
         ax.plot([f/2, 1 - f/2], [f*np.sqrt(3)/2]*2, color=color, lw=lw, ls=ls)
         ax.plot([f, (1 + f)/2], [0, (1 - f)*np.sqrt(3)/2], color=color, lw=lw, ls=ls)
         ax.plot([(1 - f)/2, 1 - f], [(1 - f)*np.sqrt(3)/2, 0], color=color, lw=lw, ls=ls)
 
-        # Labels (A, B, C sides)
-        ax.text(f, -0.07, f"{100 - i}", ha='center', fontsize=fontsize, fontweight=fontweight, color=color)
+        # Labels
+        ax.text(f, -0.04, f"{100 - i}", ha='center', va='top', fontsize=fontsize, fontweight=fontweight, color=color)
         ax.text((1 + f)/2 + 0.03, (1 - f)*np.sqrt(3)/2, f"{i}", ha='left', fontsize=fontsize, fontweight=fontweight, color=color)
         ax.text((1 - f)/2 - 0.03, (1 - f)*np.sqrt(3)/2, f"{i}", ha='right', fontsize=fontsize, fontweight=fontweight, color=color)
 
-    # Composition point
-    ax.plot(x, y, 'ro', markersize=9)
+    # User's composition point
+    ax.plot(x, y, 'ro', markersize=8)
     ax.text(x, y + 0.035, f"({A}, {B}, {C})", ha='center', fontsize=10, fontweight='bold', color='white')
 
-    # Triangle corner labels
-    ax.text(-0.08, -0.08, "B (100%)", ha='right', fontsize=11, fontweight='bold', color='#00b4d8')
-    ax.text(1.08, -0.08, "C (100%)", ha='left', fontsize=11, fontweight='bold', color='#57cc99')
-    ax.text(0.5, np.sqrt(3)/2 + 0.07, "A (100%)", ha='center', fontsize=11, fontweight='bold', color='#f77f00')
+    # Corner labels
+    ax.text(-0.05, -0.05, "B (100%)", ha='right', fontsize=11, fontweight='bold', color='#00b4d8')
+    ax.text(1.05, -0.05, "C (100%)", ha='left', fontsize=11, fontweight='bold', color='#57cc99')
+    ax.text(0.5, np.sqrt(3)/2 + 0.05, "A (100%)", ha='center', fontsize=11, fontweight='bold', color='#f77f00')
 
-    # Cleanup
+    # Final formatting
     ax.set_aspect('equal')
     ax.axis('off')
     ax.legend(loc='lower center', ncol=3, fontsize=10, frameon=False)
