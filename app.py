@@ -51,21 +51,24 @@ else:
     # Plot
     fig, ax = plt.subplots(figsize=(7, 7))
 
+    # Set background color for the dark theme
+    ax.set_facecolor('#2e2e2e')  # Dark background
+
     # Draw background
     ax.add_patch(patches.Polygon([[0, 0], [1, 0], [0.5, np.sqrt(3)/2]],
-                                  closed=True, facecolor='#fefae0', edgecolor='k'))
+                                  closed=True, facecolor='#3c3c3c', edgecolor='k'))
 
-    # Draw phase regions
-    colors = {'α': '#a2d2ff', 'β': '#ffafcc', 'γ': '#caffbf'}
+    # Draw phase regions with dark theme colors
+    colors = {'α': '#4f81bd', 'β': '#f58f82', 'γ': '#93d19b'}
     for phase, coords in phase_regions.items():
-        patch = patches.Polygon(coords, closed=True, facecolor=colors[phase], alpha=0.5, label=f'Phase {phase}')
+        patch = patches.Polygon(coords, closed=True, facecolor=colors[phase], alpha=0.7, label=f'Phase {phase}')
         ax.add_patch(patch)
 
-    # Grid lines with color logic
+    # Grid lines with dark theme adjustments
     for i in range(5, 100, 5):
         f = i / 100
         is_10 = (i % 10 == 0)
-        color = '#003f5c' if is_10 else '#ffa600'
+        color = '#d3d3d3' if is_10 else '#a5a5a5'
         lw = 1.5 if is_10 else 0.8
         ls = '-' if is_10 else '--'
         fontsize = 8 if is_10 else 6
@@ -80,11 +83,11 @@ else:
         ax.text((1 - f)/2 - 0.03, (1 - f) * np.sqrt(3)/2, f"{i}", ha='right', fontsize=fontsize, fontweight=fontweight, color=color)
 
     # Outer triangle
-    ax.plot([0, 1, 0.5, 0], [0, 0, np.sqrt(3)/2, 0], 'k', lw=2)
+    ax.plot([0, 1, 0.5, 0], [0, 0, np.sqrt(3)/2, 0], 'w', lw=2)
 
     # Point
     ax.plot(x, y, 'ro', markersize=8)
-    ax.text(x, y + 0.035, f"({A}, {B}, {C})", ha='center', fontsize=10, fontweight='bold')
+    ax.text(x, y + 0.035, f"({A}, {B}, {C})", ha='center', fontsize=10, fontweight='bold', color='white')
 
     # Corner labels
     ax.text(-0.05, -0.05, "B (100%)", ha='right', fontsize=11, fontweight='bold', color='#0077b6')
@@ -93,5 +96,5 @@ else:
 
     ax.set_aspect('equal')
     ax.axis('off')
-    ax.legend(loc='lower center', ncol=3)
+    ax.legend(loc='lower center', ncol=3, fontsize=10, frameon=False, title="Phase Regions", title_fontsize=12, labelspacing=1.2)
     st.pyplot(fig)
