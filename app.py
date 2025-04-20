@@ -22,15 +22,15 @@ A_vertex = (0.5, np.sqrt(3)/2)
 B_vertex = (0, 0)
 C_vertex = (1, 0)
 
-# Phase boundary points
-pt1 = ternary_to_cartesian(70, 30, 0)
-pt2 = ternary_to_cartesian(20, 60, 20)
-pt3 = ternary_to_cartesian(0, 20, 80)
+# Phase boundary points (intersection point is where all three regions meet)
+pt1 = ternary_to_cartesian(70, 30, 0)        # Boundary between α and β
+pt2 = ternary_to_cartesian(20, 60, 20)       # Intersection point (α, β, γ meet)
+pt3 = ternary_to_cartesian(0, 20, 80)        # Boundary between β and γ
 
-# Phase boundary lines (now three bold lines)
-boundary1 = [pt1, pt2]  # alpha/beta
-boundary2 = [pt2, pt3]  # beta/gamma
-boundary3 = [A_vertex, B_vertex]  # alpha/gamma (left edge)
+# Phase boundary lines
+boundary1 = [pt1, pt2]        # α/β
+boundary2 = [pt2, pt3]        # β/γ
+boundary3 = [B_vertex, pt2]   # α/γ (from vertex B to intersection point)
 
 # Phase region polygons
 region_alpha = [B_vertex, pt1, pt2, A_vertex]
