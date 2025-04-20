@@ -2,71 +2,89 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.patches as patches
+from matplotlib.path import Path
 
-st.title("🎨 Stylish Ternary Diagram (Gibbs Triangle) Plotter")
+st.title("📘 Ternary Diagram with Phase Regions")
 
 st.markdown("""
-Adjust the sliders to set **Component A** and **Component B** (in steps of 5).  
-Component **C** is automatically calculated as `100 - A - B`.
+Adjust A and B (in multiples of 5).  
+Component C is calculated automatically.  
+We'll show the **phase region** (α, β, γ) based on your selected composition.
 """)
 
-# Input sliders
+# Input
 A = st.slider("Component A (%)", min_value=0, max_value=100, step=5, value=30)
 B = st.slider("Component B (%)", min_value=0, max_value=100 - A, step=5, value=30)
 C = 100 - A - B
 
+# Convert ternary to cartesian
+def ternary_to_cartesian(a, b, c):
+    total = a + b + c
+    x = 0.5 * (2 * b + c) / total
+    y = (np.sqrt(3) / 2) * c / total
+    return x, y
+
+# Define phase regions as triangle areas
+# You can modify these boundaries for real systems
+phase_regions = {
+    "α": [(0.0, 0.0), (0.4, 0.0), (0.2, 0.3)],
+    "β": [(0.4, 0.0), (1.0, 0.0), (0.7, 0.6), (0.2, 0.3)],
+    "γ": [(0.2, 0.3), (0.7, 0.6), (0.5, np.sqrt(3)/2)]
+}
+
+# Determine which phase the point falls in
+def get_phase(x, y):
+    for phase, coords in phase_regions.items():
+        path = Path(coords)
+        if path.contains_point((x, y)):
+            return phase
+    return "Unknown"
+
 if A + B > 100:
-    st.error(f"The sum of A and B cannot exceed 100. Current sum: {A + B}")
+    st.error(f"Invalid: A + B = {A + B} > 100")
 else:
-    st.success(f"🎯 Valid input! Component C is: {C}%")
+    C = 100 - A - B
+    x, y = ternary_to_cartesian(A, B, C)
+    current_phase = get_phase(x, y)
+    st.success(f"Composition: A = {A}%, B = {B}%, C = {C}% → Phase: **{current_phase}**")
 
-    # Ternary to Cartesian
-    def ternary_to_cartesian(a, b, c):
-        total = a + b + c
-        x = 0.5 * (2 * b + c) / total
-        y = (np.sqrt(3) / 2) * c / total
-        return x, y
-
+    # Plot
     fig, ax = plt.subplots(figsize=(7, 7))
 
-    # Add soft gradient background with pastel feel
-    bg_triangle = patches.Polygon(
-        [[0, 0], [1, 0], [0.5, np.sqrt(3)/2]],
-        closed=True,
-        facecolor="#fef6e4",  # soft cream
-        edgecolor='none',
-        alpha=0.9
-    )
-    ax.add_patch(bg_triangle)
+    # Draw background
+    ax.add_patch(patches.Polygon([[0, 0], [1, 0], [0.5, np.sqrt(3)/2]],
+                                  closed=True, facecolor='#fefae0', edgecolor='k'))
 
-    # Outer triangle border
-    triangle_coords = np.array([[0, 0], [1, 0], [0.5, np.sqrt(3)/2], [0, 0]])
-    ax.plot(triangle_coords[:, 0], triangle_coords[:, 1], color="#333333", linewidth=2)
+    # Draw phase regions
+    colors = {'α': '#a2d2ff', 'β': '#ffafcc', 'γ': '#caffbf'}
+    for phase, coords in phase_regions.items():
+        patch = patches.Polygon(coords, closed=True, facecolor=colors[phase], alpha=0.5, label=f'Phase {phase}')
+        ax.add_patch(patch)
 
-    # Draw grid
+    # Grid lines with color logic
     for i in range(5, 100, 5):
         f = i / 100
-        is_multiple_10 = (i % 10 == 0)
-        color = '#003f5c' if is_multiple_10 else '#ffa600'  # navy vs orange
-        linewidth = 1.5 if is_multiple_10 else 0.8
-        linestyle = '-' if is_multiple_10 else '--'
-        fontsize = 8 if is_multiple_10 else 6
-        fontweight = 'bold' if is_multiple_10 else 'normal'
+        is_10 = (i % 10 == 0)
+        color = '#003f5c' if is_10 else '#ffa600'
+        lw = 1.5 if is_10 else 0.8
+        ls = '-' if is_10 else '--'
+        fontsize = 8 if is_10 else 6
+        fontweight = 'bold' if is_10 else 'normal'
 
-        # Grid lines
-        ax.plot([f/2, 1 - f/2], [f * np.sqrt(3)/2]*2, color=color, linewidth=linewidth, linestyle=linestyle)  # A lines
-        ax.plot([f, (1 + f)/2], [0, (1 - f) * np.sqrt(3)/2], color=color, linewidth=linewidth, linestyle=linestyle)  # B lines
-        ax.plot([(1 - f)/2, 1 - f], [(1 - f) * np.sqrt(3)/2, 0], color=color, linewidth=linewidth, linestyle=linestyle)  # C lines
+        ax.plot([f / 2, 1 - f / 2], [f * np.sqrt(3)/2]*2, color=color, lw=lw, ls=ls)
+        ax.plot([f, (1 + f)/2], [0, (1 - f) * np.sqrt(3)/2], color=color, lw=lw, ls=ls)
+        ax.plot([(1 - f)/2, 1 - f], [(1 - f) * np.sqrt(3)/2, 0], color=color, lw=lw, ls=ls)
 
-        # Grid labels
         ax.text(f, -0.04, f"{100 - i}", ha='center', va='top', fontsize=fontsize, fontweight=fontweight, color=color)
-        ax.text((1 + f)/2 + 0.03, (1 - f) * np.sqrt(3)/2, f"{i}", ha='left', va='center', fontsize=fontsize, fontweight=fontweight, color=color)
-        ax.text((1 - f)/2 - 0.03, (1 - f) * np.sqrt(3)/2, f"{i}", ha='right', va='center', fontsize=fontsize, fontweight=fontweight, color=color)
+        ax.text((1 + f)/2 + 0.03, (1 - f) * np.sqrt(3)/2, f"{i}", ha='left', fontsize=fontsize, fontweight=fontweight, color=color)
+        ax.text((1 - f)/2 - 0.03, (1 - f) * np.sqrt(3)/2, f"{i}", ha='right', fontsize=fontsize, fontweight=fontweight, color=color)
 
-    # Plot the user point
-    x, y = ternary_to_cartesian(A, B, C)
+    # Outer triangle
+    ax.plot([0, 1, 0.5, 0], [0, 0, np.sqrt(3)/2, 0], 'k', lw=2)
+
+    # Point
     ax.plot(x, y, 'ro', markersize=8)
-    ax.text(x, y + 0.035, f"({A}, {B}, {C})", ha='center', fontsize=10, fontweight='bold', color='black')
+    ax.text(x, y + 0.035, f"({A}, {B}, {C})", ha='center', fontsize=10, fontweight='bold')
 
     # Corner labels
     ax.text(-0.05, -0.05, "B (100%)", ha='right', fontsize=11, fontweight='bold', color='#0077b6')
@@ -75,5 +93,5 @@ else:
 
     ax.set_aspect('equal')
     ax.axis('off')
-
+    ax.legend(loc='lower center', ncol=3)
     st.pyplot(fig)
