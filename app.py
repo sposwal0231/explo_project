@@ -96,10 +96,10 @@ else:
         # Add labels
         ax.text(f, -0.04, f"{100 - i}", ha='center', va='top', 
                 fontsize=fontsize, fontweight=fontweight, color=color)  # B-axis
-        ax.text((1 + f)/2 + 0.03, (1 - f)*np.sqrt(3)/2, f"{100-i}", ha='left', 
+        ax.text((1 + f)/2 + 0.03, (1 - f)*np.sqrt(3)/2, f"{100 - i}", ha='left', 
                 fontsize=fontsize, fontweight=fontweight, color=color)  # C-axis
-        ax.text((1 - f)/2 - 0.03, (1 - f)*np.sqrt(3)/2, f"{100-i}", ha='right', 
-                fontsize=fontsize, fontweight=fontweight, c1olor=color)  # A-axis
+        ax.text((1 - f)/2 - 0.03, (1 - f)*np.sqrt(3)/2, f"{100 - i}", ha='right', 
+                fontsize=fontsize, fontweight=fontweight, color=color)  # A-axis
 
     # User point
     ax.plot(x, y, 'ro', markersize=8)
