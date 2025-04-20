@@ -16,28 +16,24 @@ A = st.slider("Component A (%)", 0, 100, step=5, value=30)
 B = st.slider("Component B (%)", 0, 100 - A, step=5, value=30)
 C = 100 - A - B
 
-# Convert ternary to Cartesian coordinates
 def ternary_to_cartesian(a, b, c):
     total = a + b + c
     x = 0.5 * (2 * b + c) / total
     y = (np.sqrt(3) / 2) * c / total
     return x, y
 
-# Define phase regions (in cartesian space, strictly inside the triangle)
 phase_regions = {
     "α": [(0.0, 0.0), (0.4, 0.0), (0.2, 0.3)],
     "β": [(0.4, 0.0), (1.0, 0.0), (0.7, 0.6), (0.2, 0.3)],
     "γ": [(0.2, 0.3), (0.7, 0.6), (0.5, np.sqrt(3)/2)]
 }
 
-# Define phase colors
 phase_colors = {
     "α": "lightblue",
     "β": "lightgreen",
     "γ": "lightcoral"
 }
 
-# Determine which phase the composition falls into
 def get_phase(x, y):
     for phase, coords in phase_regions.items():
         path = Path(coords)
@@ -45,7 +41,6 @@ def get_phase(x, y):
             return phase
     return "Unknown"
 
-# Composition check
 if A + B > 100:
     st.error("Invalid input: A + B exceeds 100%")
 else:
@@ -53,21 +48,20 @@ else:
     phase = get_phase(x, y)
     st.success(f"Composition: A = {A}%, B = {B}%, C = {C}% → Phase: **{phase}**")
 
-    # Plot setup
     fig, ax = plt.subplots(figsize=(7, 7))
     ax.set_facecolor("white")
 
-    # Draw main triangle
+    # Main triangle
     triangle_coords = np.array([[0, 0], [1, 0], [0.5, np.sqrt(3)/2]])
     triangle_patch = patches.Polygon(triangle_coords, closed=True, facecolor="white", edgecolor='black', lw=2)
     ax.add_patch(triangle_patch)
 
-    # Draw phase regions
+    # Phase regions
     for phase, coords in phase_regions.items():
         phase_patch = patches.Polygon(coords, closed=True, facecolor=phase_colors[phase], edgecolor='black', lw=2, alpha=0.5)
         ax.add_patch(phase_patch)
 
-    # Draw boundaries between phases
+    # Phase boundaries
     boundary_lines = [
         [(0.0, 0.0), (0.4, 0.0), (0.2, 0.3)],
         [(0.4, 0.0), (1.0, 0.0), (0.7, 0.6), (0.2, 0.3)],
@@ -77,21 +71,29 @@ else:
     for line in boundary_lines:
         ax.plot(*zip(*line), color='black', lw=2)
 
-    # Modified grid lines and labels (5% increments, bold uniform style)
+    # Modified grid system with tiered styling
     for i in range(5, 100, 5):
         f = i / 100
-        color = 'black'
-        lw = 1.5
-        ls = '-'
-        fontsize = 8
-        fontweight = 'bold'
+        is_major = i % 10 == 0  # Check for multiples of 10
+        
+        # Style configuration
+        if is_major:
+            color = '#404040'  # Dark gray
+            lw = 2
+            fontsize = 10
+            fontweight = 'bold'
+        else:
+            color = '#808080'  # Medium gray
+            lw = 1.5
+            fontsize = 8
+            fontweight = 'normal'
 
         # Draw grid lines
-        ax.plot([f/2, 1 - f/2], [f*np.sqrt(3)/2]*2, color=color, lw=lw, ls=ls)
-        ax.plot([f, (1 + f)/2], [0, (1 - f)*np.sqrt(3)/2], color=color, lw=lw, ls=ls)
-        ax.plot([(1 - f)/2, 1 - f], [(1 - f)*np.sqrt(3)/2, 0], color=color, lw=lw, ls=ls)
+        ax.plot([f/2, 1 - f/2], [f*np.sqrt(3)/2]*2, color=color, lw=lw, ls='-')
+        ax.plot([f, (1 + f)/2], [0, (1 - f)*np.sqrt(3)/2], color=color, lw=lw, ls='-')
+        ax.plot([(1 - f)/2, 1 - f], [(1 - f)*np.sqrt(3)/2, 0], color=color, lw=lw, ls='-')
 
-        # Axis labels (all decreasing from 95% to 5%)
+        # Add labels
         ax.text(f, -0.04, f"{100 - i}", ha='center', va='top', 
                 fontsize=fontsize, fontweight=fontweight, color=color)  # B-axis
         ax.text((1 + f)/2 + 0.03, (1 - f)*np.sqrt(3)/2, f"{100 - i}", ha='left', 
@@ -99,16 +101,15 @@ else:
         ax.text((1 - f)/2 - 0.03, (1 - f)*np.sqrt(3)/2, f"{100 - i}", ha='right', 
                 fontsize=fontsize, fontweight=fontweight, color=color)  # A-axis
 
-    # Plot user point
+    # User point
     ax.plot(x, y, 'ro', markersize=8)
     ax.text(x, y + 0.035, f"({A}, {B}, {C})", ha='center', fontsize=10, fontweight='bold', color='black')
 
-    # Corner labels (match screenshot positions)
+    # Vertex labels
     ax.text(-0.05, -0.05, "B (100%)", ha='right', fontsize=11, fontweight='bold', color='blue')
     ax.text(1.05, -0.05, "C (100%)", ha='left', fontsize=11, fontweight='bold', color='green')
     ax.text(0.5, np.sqrt(3)/2 + 0.05, "A (100%)", ha='center', fontsize=11, fontweight='bold', color='orange')
 
-    # Final formatting
     ax.set_aspect('equal')
     ax.axis('off')
     st.pyplot(fig)
