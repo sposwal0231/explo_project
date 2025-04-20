@@ -16,12 +16,15 @@ A = st.slider("Component A (%)", 0, 100, step=5, value=30)
 B = st.slider("Component B (%)", 0, 100 - A, step=5, value=30)
 C = 100 - A - B
 
+# --- Corrected mapping function ---
 def ternary_to_cartesian(a, b, c):
     total = a + b + c
-    x = 0.5 * (2 * b + c) / total
-    y = (np.sqrt(3) / 2) * c / total
+    # A at top, B at bottom left, C at bottom right
+    x = 0.5 * (2 * c + a) / total
+    y = (np.sqrt(3) / 2) * a / total
     return x, y
 
+# --- Phase regions (coordinates in triangle space) ---
 phase_regions = {
     "α": [(0.0, 0.0), (0.4, 0.0), (0.2, 0.3)],
     "β": [(0.4, 0.0), (1.0, 0.0), (0.7, 0.6), (0.2, 0.3)],
@@ -51,7 +54,7 @@ else:
     fig, ax = plt.subplots(figsize=(7, 7))
     ax.set_facecolor("white")
 
-    # Main triangle
+    # Main triangle (A at top, B at bottom left, C at bottom right)
     triangle_coords = np.array([[0, 0], [1, 0], [0.5, np.sqrt(3)/2]])
     triangle_patch = patches.Polygon(triangle_coords, closed=True, facecolor="white", edgecolor='black', lw=2)
     ax.add_patch(triangle_patch)
@@ -89,26 +92,29 @@ else:
             fontweight = 'normal'
 
         # Draw grid lines
+        # A-axis (bottom, left to right)
         ax.plot([f/2, 1 - f/2], [f*np.sqrt(3)/2]*2, color=color, lw=lw, ls='-')
+        # B-axis (right, up to top)
         ax.plot([f, (1 + f)/2], [0, (1 - f)*np.sqrt(3)/2], color=color, lw=lw, ls='-')
+        # C-axis (left, up to top)
         ax.plot([(1 - f)/2, 1 - f], [(1 - f)*np.sqrt(3)/2, 0], color=color, lw=lw, ls='-')
 
         # Add labels
         ax.text(f, -0.04, f"{100 - i}", ha='center', va='top', 
-                fontsize=fontsize, fontweight=fontweight, color=color)  # B-axis
-        ax.text((1 + f)/2 + 0.03, (1 - f)*np.sqrt(3)/2, f"{100 - i}", ha='left', 
                 fontsize=fontsize, fontweight=fontweight, color=color)  # C-axis
-        ax.text((1 - f)/2 - 0.03, (1 - f)*np.sqrt(3)/2, f"{100 - i}", ha='right', 
+        ax.text((1 + f)/2 + 0.03, (1 - f)*np.sqrt(3)/2, f"{100 - i}", ha='left', 
                 fontsize=fontsize, fontweight=fontweight, color=color)  # A-axis
+        ax.text((1 - f)/2 - 0.03, (1 - f)*np.sqrt(3)/2, f"{100 - i}", ha='right', 
+                fontsize=fontsize, fontweight=fontweight, color=color)  # B-axis
 
     # User point
     ax.plot(x, y, 'ro', markersize=8)
     ax.text(x, y + 0.035, f"({A}, {B}, {C})", ha='center', fontsize=10, fontweight='bold', color='black')
 
     # Vertex labels
+    ax.text(0.5, np.sqrt(3)/2 + 0.05, "A (100%)", ha='center', fontsize=11, fontweight='bold', color='orange')
     ax.text(-0.05, -0.05, "B (100%)", ha='right', fontsize=11, fontweight='bold', color='blue')
     ax.text(1.05, -0.05, "C (100%)", ha='left', fontsize=11, fontweight='bold', color='green')
-    ax.text(0.5, np.sqrt(3)/2 + 0.05, "A (100%)", ha='center', fontsize=11, fontweight='bold', color='orange')
 
     ax.set_aspect('equal')
     ax.axis('off')
