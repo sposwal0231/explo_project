@@ -59,9 +59,10 @@ else:
     triangle_patch = patches.Polygon(triangle_coords, closed=True, facecolor="white", edgecolor='black', lw=2)
     ax.add_patch(triangle_patch)
 
-    # Phase regions
+    # Phase regions, now clipped to the triangle
     for phase, coords in phase_regions.items():
         phase_patch = patches.Polygon(coords, closed=True, facecolor=phase_colors[phase], edgecolor='black', lw=2, alpha=0.5)
+        phase_patch.set_clip_path(triangle_patch)
         ax.add_patch(phase_patch)
 
     # Phase boundaries
