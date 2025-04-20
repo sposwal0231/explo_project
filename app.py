@@ -23,7 +23,7 @@ def ternary_to_cartesian(a, b, c):
     y = (np.sqrt(3) / 2) * c / total
     return x, y
 
-# Define phase regions (in cartesian space)
+# Define phase regions (in cartesian space, strictly inside the triangle)
 phase_regions = {
     "α": [(0.0, 0.0), (0.4, 0.0), (0.2, 0.3)],
     "β": [(0.4, 0.0), (1.0, 0.0), (0.7, 0.6), (0.2, 0.3)],
@@ -67,7 +67,7 @@ else:
         phase_patch = patches.Polygon(coords, closed=True, facecolor=phase_colors[phase], edgecolor='black', lw=2, alpha=0.5)
         ax.add_patch(phase_patch)
 
-    # Draw phase boundary lines
+    # Draw phase boundary lines inside the triangle
     boundary_lines = [
         [(0.0, 0.0), (0.4, 0.0), (0.2, 0.3)],  # α region boundary
         [(0.4, 0.0), (1.0, 0.0), (0.7, 0.6), (0.2, 0.3)],  # β region boundary
