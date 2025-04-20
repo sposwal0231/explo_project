@@ -12,8 +12,8 @@ Your selected composition will be placed on the triangle and the corresponding *
 """)
 
 # Component sliders
-C = st.slider("Component A (%)", 0, 100, step=5, value=30)
-A = st.slider("Component B (%)", 0, 100 - C, step=5, value=30)
+C = st.slider("Component C (%)", 0, 100, step=5, value=30)
+A = st.slider("Component A (%)", 0, 100 - C, step=5, value=30)
 B = 100 - A - C
 
 def ternary_to_cartesian(a, b, c):
