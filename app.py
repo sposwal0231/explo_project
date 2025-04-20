@@ -37,9 +37,9 @@ else:
     ])
     ax.plot(triangle_coords[:,0], triangle_coords[:,1], 'k')
 
-    # Draw grid lines and labels along each edge
-    for i in range(1, 10):
-        f = i / 10
+    # Draw grid lines and labels for multiples of 5
+    for i in range(5, 100, 5):
+        f = i / 100
         # Grid lines
         ax.plot([f/2, 1 - f/2], [f * np.sqrt(3)/2]*2, color='gray', linewidth=0.5, linestyle='--')
         ax.plot([f, (1+f)/2], [0, (1-f)*np.sqrt(3)/2], color='gray', linewidth=0.5, linestyle='--')
@@ -47,15 +47,15 @@ else:
 
         # Labels
         # B-C edge (bottom)
-        ax.text(f, -0.03, f"{int((1 - f) * 100)}", ha='center', va='top', fontsize=7)
+        ax.text(f, -0.03, f"{100 - i}", ha='center', va='top', fontsize=7)
         # A-C edge (right)
         x_ac = (1 + f) / 2
         y_ac = (1 - f) * np.sqrt(3)/2
-        ax.text(x_ac + 0.03, y_ac, f"{int(f * 100)}", ha='left', va='center', fontsize=7)
+        ax.text(x_ac + 0.03, y_ac, f"{i}", ha='left', va='center', fontsize=7)
         # A-B edge (left)
         x_ab = (1 - f) / 2
         y_ab = (1 - f) * np.sqrt(3)/2
-        ax.text(x_ab - 0.03, y_ab, f"{int(f * 100)}", ha='right', va='center', fontsize=7)
+        ax.text(x_ab - 0.03, y_ab, f"{i}", ha='right', va='center', fontsize=7)
 
     # Plot the point
     x, y = ternary_to_cartesian(A, B, C)
