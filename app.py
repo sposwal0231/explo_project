@@ -12,7 +12,7 @@ st.title("Gibbs Triangle Explorer")
 
 tab1, tab2 = st.tabs([
     "Gibbs Triangle with Phase Regions",
-    "Simple Gibbs Triangle (Light Blue-Pink Gradient)"
+    "Simple Gibbs Triangle"
 ])
 
 # --- TAB 1: Gibbs Triangle with Phase Regions ---
@@ -145,9 +145,9 @@ with tab1:
 
 # --- TAB 2: Simple Gibbs Triangle (Light Blue-Pink Gradient) ---
 with tab2:
-    st.header("Simple Gibbs Triangle (Light Blue-Pink Gradient)")
-    A2 = st.slider("Component A (%) [No Phase Lines]", 0, 100, step=5, value=50, key='A_simple')
-    B2 = st.slider("Component B (%) [No Phase Lines]", 0, 100 - A2, step=5, value=35, key='B_simple')
+    st.header("Simple Gibbs Triangle")
+    A2 = st.slider("Component A (%)", 0, 100, step=5, value=50, key='A_simple')
+    B2 = st.slider("Component B (%)", 0, 100 - A2, step=5, value=35, key='B_simple')
     C2 = 100 - A2 - B2
 
     if C2 < 0:
