@@ -8,33 +8,50 @@ import io
 
 st.title("Gibb's Triangle with Phase Regions")
 
+# --- Validation function ---
+def validate_composition(A, B, C):
+    # Clamp negative values to zero
+    A = max(0, A)
+    B = max(0, B)
+    C = max(0, C)
+    total = A + B + C
+    if total == 0:
+        return 0, 0, 0
+    # Normalize so that A + B + C = 100
+    A = 100 * A / total
+    B = 100 * B / total
+    C = 100 * C / total
+    return A, B, C
+
+# --- User input ---
 A = st.slider("Component A (%)", 0, 100, step=5, value=50)
 B = st.slider("Component B (%)", 0, 100 - A, step=5, value=35)
 C = 100 - A - B
+A, B, C = validate_composition(A, B, C)
 
+# --- Ternary to cartesian conversion ---
 def ternary_to_cartesian(a, b, c):
     total = a + b + c
     x = 0.5 * (2 * c + a) / total
     y = (np.sqrt(3) / 2) * a / total
     return x, y
 
-# Triangle vertices
+# --- Triangle vertices ---
 A_vertex = (0.5, np.sqrt(3)/2)
 B_vertex = (0, 0)
 C_vertex = (1, 0)
 
-# Intersection points for phase boundaries (estimated visually from your image)
-# Adjust these if you want to move the boundaries
+# --- Intersection points for phase boundaries ---
 intersection = ternary_to_cartesian(40, 40, 20)        # Triple point
 left_boundary = ternary_to_cartesian(70, 30, 0)        # Where α/β meets left edge
 bottom_boundary = ternary_to_cartesian(0, 20, 80)      # Where β/γ meets bottom edge
 
-# Phase boundaries (for bold lines)
+# --- Phase boundaries (for bold lines) ---
 boundary1 = [left_boundary, intersection]      # α/β (red/green)
 boundary2 = [intersection, bottom_boundary]    # β/γ (green/blue)
 boundary3 = [B_vertex, intersection]           # α/γ (red/blue)
 
-# Phase region polygons (no overlap)
+# --- Phase region polygons (no overlap) ---
 region_alpha = [B_vertex, intersection, A_vertex, left_boundary]
 region_beta  = [intersection, bottom_boundary, C_vertex, A_vertex, left_boundary]
 region_gamma = [B_vertex, intersection, bottom_boundary, C_vertex]
@@ -63,21 +80,21 @@ phase = get_phase(x, y)
 fig, ax = plt.subplots(figsize=(8, 8))
 ax.set_facecolor("white")
 
-# Draw phase regions
+# --- Draw phase regions ---
 for p, coords in phase_regions.items():
     phase_patch = patches.Polygon(coords, closed=True, facecolor=phase_colors[p], edgecolor=None, lw=0, alpha=0.7, zorder=1)
     ax.add_patch(phase_patch)
 
-# Draw bold black phase boundaries
+# --- Draw bold black phase boundaries ---
 ax.plot(*zip(*boundary1), color='black', lw=3, zorder=2)
 ax.plot(*zip(*boundary2), color='black', lw=3, zorder=2)
 ax.plot(*zip(*boundary3), color='black', lw=3, zorder=2)
 
-# Draw main triangle
+# --- Draw main triangle ---
 triangle_coords = np.array([B_vertex, C_vertex, A_vertex])
 ax.plot(*zip(*(triangle_coords.tolist() + [triangle_coords[0].tolist()])), color='black', lw=2, zorder=3)
 
-# Draw grid lines and grid triangles
+# --- Draw grid lines and grid triangles ---
 for i in range(5, 100, 5):
     f = i / 100
     is_major = i % 10 == 0
@@ -96,16 +113,16 @@ for i in range(5, 100, 5):
     ax.text((1 + f)/2 + 0.03, (1 - f)*np.sqrt(3)/2, f"{i}", ha='left', fontsize=fontsize, fontweight=fontweight, color=color)
     ax.text((1 - f)/2 - 0.03, (1 - f)*np.sqrt(3)/2, f"{100- i}", ha='right', fontsize=fontsize, fontweight=fontweight, color=color)
 
-# User point
+# --- User point ---
 ax.plot(x, y, 'ro', markersize=12, zorder=4)
-ax.text(x, y + 0.03, f"({A}, {B}, {C})", ha='center', fontsize=12, fontweight='bold', color='black', zorder=5)
+ax.text(x, y + 0.03, f"({A:.1f}, {B:.1f}, {C:.1f})", ha='center', fontsize=12, fontweight='bold', color='black', zorder=5)
 
-# Vertex labels
+# --- Vertex labels ---
 ax.text(0.5, np.sqrt(3)/2 + 0.06, "A (100%)", ha='center', fontsize=18, fontweight='bold', color='orange')
 ax.text(-0.05, -0.05, "B (100%)", ha='right', fontsize=18, fontweight='bold', color='blue')
 ax.text(1.05, -0.05, "C (100%)", ha='left', fontsize=18, fontweight='bold', color='green')
 
-# Add legend for phase regions
+# --- Add legend for phase regions ---
 legend_patches = [
     mpatches.Patch(color="#ffcccc", label="Phase α (red, top)"),
     mpatches.Patch(color="#d6f5d6", label="Phase β (green, bottom right)"),
@@ -121,7 +138,7 @@ ax.axis('off')
 st.pyplot(fig)
 
 # --- Show result message ---
-st.success(f"Composition: A = {A}%, B = {B}%, C = {C}% → Phase: **{phase}**")
+st.success(f"Composition: A = {A:.1f}%, B = {B:.1f}%, C = {C:.1f}% → Phase: **{phase}**")
 
 # --- Download Feature ---
 buf = io.BytesIO()
