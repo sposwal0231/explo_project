@@ -14,6 +14,35 @@ tab1, tab2 = st.tabs([
     "Simple Gibbs Triangle (Light Blue-Pink Gradient)"
 ])
 
+# Helper functions for boundary detection
+
+def point_line_distance(point, line_start, line_end):
+    point = np.array(point)
+    line_start = np.array(line_start)
+    line_end = np.array(line_end)
+    line_vec = line_end - line_start
+    point_vec = point - line_start
+    line_len = np.linalg.norm(line_vec)
+    if line_len == 0:
+        return np.linalg.norm(point_vec)
+    line_unitvec = line_vec / line_len
+    proj_length = np.dot(point_vec, line_unitvec)
+    if proj_length < 0:
+        return np.linalg.norm(point_vec)
+    elif proj_length > line_len:
+        return np.linalg.norm(point - line_end)
+    proj_point = line_start + proj_length * line_unitvec
+    return np.linalg.norm(point - proj_point)
+
+TOLERANCE = 0.02  # Tolerance for "on the line" detection
+
+def check_on_boundary(x, y, boundaries):
+    for phases, (start, end) in boundaries.items():
+        dist = point_line_distance((x, y), start, end)
+        if dist < TOLERANCE:
+            return phases
+    return None
+
 # --- TAB 1: Gibbs Triangle with Phase Regions ---
 with tab1:
     st.header("Gibbs Triangle with Phase Regions")
@@ -61,13 +90,23 @@ with tab1:
             "γ": "#d6e0f5"
         }
 
+        # Boundaries dict for detection (keys are tuples of phase names)
+        boundaries = {
+            ('α', 'β'): (left_boundary, intersection),
+            ('β', 'γ'): (intersection, bottom_boundary),
+            ('α', 'γ'): (B_vertex, intersection)
+        }
+
         # Triple point detection
-        def is_triple_point(a, b, c, tol=2.5):  # Tolerance matches slider step
+        def is_triple_point(a, b, c, tol=2.5):
             return abs(a - 40) < tol and abs(b - 40) < tol and abs(c - 20) < tol
 
         def get_phase(x, y, a, b, c):
             if is_triple_point(a, b, c):
                 return "Triple"
+            on_boundary = check_on_boundary(x, y, boundaries)
+            if on_boundary is not None:
+                return f"Two-phase: {on_boundary[0]} and {on_boundary[1]}"
             for phase, coords in phase_regions.items():
                 path = Path(coords)
                 if path.contains_point((x, y)):
@@ -137,8 +176,11 @@ with tab1:
 
         st.pyplot(fig)
 
+        # Output message
         if phase == "Triple":
             st.info("Triple point: All three phases (α, β, γ) coexist at this composition.")
+        elif phase.startswith("Two-phase"):
+            st.info(f"{phase} coexist at this composition.")
         else:
             st.success(f"Composition: A = {A:.1f}%, B = {B:.1f}%, C = {C:.1f}% → Phase: **{phase}**")
 
