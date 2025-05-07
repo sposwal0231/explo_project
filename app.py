@@ -14,8 +14,6 @@ tab1, tab2 = st.tabs([
     "Simple Gibbs Triangle (Light Blue-Pink Gradient)"
 ])
 
-# Helper functions for boundary detection
-
 def point_line_distance(point, line_start, line_end):
     point = np.array(point)
     line_start = np.array(line_start)
@@ -34,7 +32,7 @@ def point_line_distance(point, line_start, line_end):
     proj_point = line_start + proj_length * line_unitvec
     return np.linalg.norm(point - proj_point)
 
-TOLERANCE = 0.02  # Tolerance for "on the line" detection
+TOLERANCE = 0.02
 
 def check_on_boundary(x, y, boundaries):
     for phases, (start, end) in boundaries.items():
@@ -70,13 +68,13 @@ with tab1:
         bottom_boundary = ternary_to_cartesian(0, 20, 80)
 
         # Phase boundaries (for bold lines)
-        boundary1 = [left_boundary, intersection]
-        boundary2 = [intersection, bottom_boundary]
-        boundary3 = [B_vertex, intersection]
+        boundary1 = [left_boundary, intersection]      # α/β
+        boundary2 = [intersection, bottom_boundary]    # β/γ
+        boundary3 = [B_vertex, intersection]           # α/γ
 
-        # Phase region polygons (no overlap)
-        region_alpha = [B_vertex, intersection, A_vertex, left_boundary]
-        region_beta  = [intersection, bottom_boundary, C_vertex, A_vertex, left_boundary]
+        # --- CORRECTED PHASE REGION POLYGONS ---
+        region_alpha = [B_vertex, left_boundary, A_vertex]
+        region_beta  = [left_boundary, intersection, bottom_boundary, C_vertex, A_vertex]
         region_gamma = [B_vertex, intersection, bottom_boundary, C_vertex]
 
         phase_regions = {
@@ -90,14 +88,12 @@ with tab1:
             "γ": "#d6e0f5"
         }
 
-        # Boundaries dict for detection (keys are tuples of phase names)
         boundaries = {
             ('α', 'β'): (left_boundary, intersection),
             ('β', 'γ'): (intersection, bottom_boundary),
             ('α', 'γ'): (B_vertex, intersection)
         }
 
-        # Triple point detection
         def is_triple_point(a, b, c, tol=2.5):
             return abs(a - 40) < tol and abs(b - 40) < tol and abs(c - 20) < tol
 
